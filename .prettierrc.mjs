@@ -2,14 +2,23 @@
  * @type {import('prettier').Options}
  */
 export default {
-  printWidth: 80,
-  tabWidth: 2,
-  useTabs: false,
-  semi: false,
-  singleQuote: false,
-  trailingComma: "none",
+  arrowParens: "always",
+  bracketSameLine: false,
   bracketSpacing: true,
-  bracketSameLine: true,
+  embeddedLanguageFormatting: "auto",
+  htmlWhitespaceSensitivity: "css",
+  insertPragma: false,
+  jsxSingleQuote: false,
+  printWidth: 120,
+  proseWrap: "preserve",
+  quoteProps: "as-needed",
+  requirePragma: false,
+  semi: true,
+  singleQuote: true,
+  tabWidth: 4,
+  trailingComma: "all",
+  useTabs: false,
+  vueIndentScriptAndStyle: false, // <--- dấu phẩy ở đây
   plugins: ["@ianvs/prettier-plugin-sort-imports"],
   importOrder: [
     "<BUILTIN_MODULES>", // Node.js built-in modules

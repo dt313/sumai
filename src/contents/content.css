@@ -1,0 +1,140 @@
+.selection-btn {
+    background: linear-gradient(135deg, #00a3cc, #00b8e6);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    width: 100px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+    transition: all 0.3 cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.selection-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #00b8e6, #00a3cc);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.selection-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal */
+
+/* Overlay */
+.plasmo-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 999998;
+}
+
+/* Modal box */
+.plasmo-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    min-height: 200px;
+    max-width: 700px;
+    width: 100%;
+    width: fit-content;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    z-index: 999999;
+    width: 92%;
+    animation: plasmo-fade-in 0.2s ease-out;
+    overflow: hidden;
+}
+
+/* Header */
+.plasmo-modal-header {
+    display: flex;
+    align-items: center;
+    padding: 18px;
+    justify-content: space-between;
+    background-color: #b6b6b6;
+}
+
+.plasmo-modal-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.filter {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.filter-item {
+    display: flex;
+    /* flex-direction: column; */
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #333;
+    gap: 4px;
+}
+
+.filter-item label {
+    font-weight: 500;
+}
+
+.plasmo-select,
+.plasmo-input {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.plasmo-select:hover,
+.plasmo-input:hover {
+    border-color: #00a3cc;
+}
+
+.plasmo-select:focus,
+.plasmo-input:focus {
+    border-color: #00a3cc;
+    box-shadow: 0 0 0 2px rgba(0, 163, 204, 0.2);
+}
+
+/* Body */
+.plasmo-modal-content {
+    color: #333;
+    padding: 18px;
+
+    line-height: 1.5;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+/* Animation */
+@keyframes plasmo-fade-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
