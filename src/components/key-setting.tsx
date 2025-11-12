@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react';
 import { keyInputs } from '~/configs/ui';
 import { storage } from '~/utils/storage';
 
+import ApiKeyInput from './api-key-input';
 import Button from './button';
 
-function KeyInput() {
+function KeySetting() {
     const [keys, setKeys] = useState({
-        // openai: '',
-        // gemini: '',
-        // anthropic: '',
+        openai: '',
+        gemini: '',
+        claude: '',
         ssu: '',
     });
 
@@ -37,20 +38,19 @@ function KeyInput() {
 
     return (
         <div className="space-y-4">
-            {keyInputs.map(({ label, key, logo }) => (
+            {keyInputs.map(({ label, key, logo, placeholder }) => (
                 <div key={key} className="flex flex-col gap-2">
                     <label className="text-sm font-semibold flex items-center gap-2">
                         {logo && <img src={logo} alt={label} className="w-auto h-5 object-cover" />}
                         {label} API Key
                     </label>
                     <div className="flex gap-2">
-                        <input
-                            type="password"
+                        <ApiKeyInput
                             value={keys[key as keyof typeof keys]}
-                            onChange={(e) => handleChange(e, key)}
-                            className="flex-1 rounded-md border px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                            placeholder={`Nhập ${label} key...`}
+                            onChange={(val) => handleChange({ target: { value: val } } as any, key)}
+                            placeholder={placeholder || `Nhập ${label} key...`}
                         />
+
                         <Button onClick={() => saveKey(label)}>Save</Button>
                     </div>
                 </div>
@@ -59,4 +59,4 @@ function KeyInput() {
     );
 }
 
-export default KeyInput;
+export default KeySetting;

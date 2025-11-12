@@ -1,16 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import images from '~/assets/images';
+import type { ModelType, RequestData } from '~types';
+import { storage } from '~utils/storage';
 
 type ModalProps = {
     content: string;
     onClose: () => void;
+    onRefresh: ({ model, language, textCount }: { model: ModelType; language: string; textCount: number }) => void;
 };
 
-const Modal: React.FC<ModalProps> = ({ content, onClose }) => {
-    const [model, setModel] = useState('openai');
+const Modal: React.FC<ModalProps> = ({ content, onClose, onRefresh }) => {
+    const [model, setModel] = useState<ModelType>('chatgpt');
     const [language, setLanguage] = useState('en');
-    const [textCount, setTextCount] = useState(100);
+    const [textCount, setTextCount] = useState(200);
+
+    useEffect(() => {
+        const initState = async () => {
+            const { defaultSetting } = await storage.get('defaultSetting');
+            setTextCount(defaultSetting?.responseTextCount || 200);
+            setLanguage(defaultSetting?.nativeLanguage || 'vietnamese');
+            setModel(defaultSetting?.model || 'chatgpt');
+        };
+
+        initState();
+    }, [storage]);
+
+    const handleRefresh = async () => {
+        onRefresh({ model, language, textCount });
+    };
 
     return (
         <>
@@ -27,12 +45,12 @@ const Modal: React.FC<ModalProps> = ({ content, onClose }) => {
                             <select
                                 id="model-select"
                                 value={model}
-                                onChange={(e) => setModel(e.target.value)}
+                                onChange={(e) => setModel(e.target.value as ModelType)}
                                 className="plasmo-select"
                             >
-                                <option value="openai">OpenAI</option>
+                                <option value="chatgpt">OpenAI</option>
                                 <option value="gemini">Gemini</option>
-                                <option value="anthropic">Anthropic</option>
+                                <option value="claude">Anthropic</option>
                             </select>
                         </div>
 
@@ -44,9 +62,9 @@ const Modal: React.FC<ModalProps> = ({ content, onClose }) => {
                                 onChange={(e) => setLanguage(e.target.value)}
                                 className="plasmo-select"
                             >
-                                <option value="en">English</option>
-                                <option value="vi">Vietnamese</option>
-                                <option value="ko">Korean</option>
+                                <option value="english">English</option>
+                                <option value="vietnamese">Vietnamese</option>
+                                <option value="korea">Korean</option>
                             </select>
                         </div>
 
@@ -64,7 +82,9 @@ const Modal: React.FC<ModalProps> = ({ content, onClose }) => {
                             />
                         </div>
 
-                        <button className="refresh-btn">Refresh</button>
+                        <button className="refresh-btn" onClick={handleRefresh}>
+                            Refresh
+                        </button>
                     </div>
                 </div>
 

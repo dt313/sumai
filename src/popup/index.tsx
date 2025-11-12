@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 
 import '../style.css';
 
-import KeyInput from '~/components/key-input';
 import Setting from '~/components/setting';
 import { storage } from '~/utils/storage';
+import KeySetting from '~components/key-setting';
 
 function IndexPopup() {
     const [loading, setLoading] = useState(true);
@@ -51,7 +51,7 @@ function IndexPopup() {
             </div>
 
             {/* Body */}
-            <div className="space-y-4">{showKeys ? <KeyInput /> : <Setting />}</div>
+            <div className="space-y-4">{showKeys ? <KeySetting /> : <Setting />}</div>
         </div>
     );
 }
