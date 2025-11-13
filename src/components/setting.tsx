@@ -64,16 +64,16 @@ function Setting() {
         setLanguage(value);
     }, []);
 
-    const toggleDouble = useCallback(() => {
-        setIsDoubleClick(!isDoubleClick);
+    const toggleDouble = useCallback((value) => {
+        setIsDoubleClick(value);
     }, []);
 
-    const toggleLogoVisible = useCallback(() => {
-        setIsLogoVisible(!isLogoVisible);
+    const toggleLogoVisible = useCallback((value) => {
+        setIsLogoVisible(value);
     }, []);
 
-    const toggleShift = useCallback(() => {
-        setIsShift(!isShift);
+    const toggleShift = useCallback((value) => {
+        setIsShift(value);
     }, []);
 
     const handleChangeTextCount = useCallback((value) => {

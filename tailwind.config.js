@@ -8,7 +8,7 @@ module.exports = {
         extend: {
             colors: {
                 primary: {
-                    light: '#00a3cc', // normal light mode
+                    light: '#0792b3', // normal light mode
                     dark: '#00a3cc', // normal dark mode
                     hover: '#005c88', // hover color
                     disabled: '#7fc3dc', // disabled color
