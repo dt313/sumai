@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import images from '~/assets/images';
-import type { ModelType, RequestData } from '~types';
+import type { ModelType, SummaryRequestData } from '~types';
 import { storage } from '~utils/storage';
 
 type ModalProps = {
@@ -34,7 +34,7 @@ const Modal: React.FC<ModalProps> = ({ content, onClose, onRefresh }) => {
         <>
             <div className="plasmo-overlay" onClick={onClose}></div>
 
-            <div className="plasmo-modal">
+            <div className="plasmo-modal" onMouseUp={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="plasmo-modal-header">
                     <img src={images.openai} alt="Logo" className="plasmo-modal-logo" />

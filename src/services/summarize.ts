@@ -1,6 +1,5 @@
+import { SSU_API_URL } from '~constants';
 import type { ModelType } from '~types';
-
-const OPENAI_API_URL = 'https://factchat-cloud.mindlogic.ai/v1/api/openai/chat/completions';
 
 export const summarize = async (
     key: string,
@@ -18,7 +17,7 @@ Focus solely on the key points.`;
 Do NOT add anything extra, only the key points:\n\n${text}`;
 
     try {
-        const response = await fetch(OPENAI_API_URL, {
+        const response = await fetch(SSU_API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

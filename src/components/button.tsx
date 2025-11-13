@@ -1,6 +1,8 @@
 import { Loader2 } from 'lucide-react';
 import React from 'react';
 
+import SpinLoading from './spin-loading';
+
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     loading?: boolean;
     variant?: 'primary' | 'secondary' | 'cancel';
@@ -35,17 +37,17 @@ export default function Button({
             disabled={disabled || loading}
             onClick={onClick}
             className={`
-        relative flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium
+        relative min-w-[80px] flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-center
         transition-colors
         ${variantClasses[variant] || variantClasses['primary']}
         ${className}
       `}
         >
-            {loading && <Loader2 className={`absolute left-3 h-4 w-4 animate-spin ${spinnerColor}`} />}
+            {loading && <SpinLoading colorClass={variant === 'secondary' ? 'text-gray-800' : 'text-white'} />}
             {leftIcon && (
                 <span className={`flex items-center ${loading ? 'opacity-0' : 'opacity-100'}`}>{leftIcon}</span>
             )}
-            <span className={`${loading ? 'opacity-0' : 'opacity-100'} flex items-center`}>{children}</span>
+            {!loading && <span className={`flex items-center`}>{children}</span>}
             {rightIcon && (
                 <span className={`flex items-center ${loading ? 'opacity-0' : 'opacity-100'}`}>{rightIcon}</span>
             )}

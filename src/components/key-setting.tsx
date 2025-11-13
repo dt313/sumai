@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 
 import { keyInputs } from '~/configs/ui';
 import { storage } from '~/utils/storage';
+import type { BackgroundResponse, KeyInput, KeyValidateRequestData, Provider } from '~types';
 
+import ApiKeyForm from './api-key-form';
 import ApiKeyInput from './api-key-input';
 import Button from './button';
 
@@ -22,38 +24,50 @@ function KeySetting() {
         loadKeys();
     }, []);
 
-    const saveKey = async (name: string) => {
+    const saveKey = async (name: Provider) => {
         try {
             const newKeys = { ...keys };
-            await storage.set({ apiKeys: newKeys });
-            alert(`${name} API key đã được lưu!`);
+            const data: KeyValidateRequestData = {
+                provider: name,
+                key: keys[name],
+            };
+            // Đợi kết quả validate từ background
+            const res = await new Promise<BackgroundResponse>((resolve) => {
+                chrome.runtime.sendMessage({ type: 'VALIDATE_KEY', data }, (response) => {
+                    resolve(response);
+                });
+            });
+
+            console.log('res', res);
+
+            if (res?.ok && res?.data?.isValid) {
+                await storage.set({ apiKeys: newKeys });
+                return;
+            } else {
+                throw new Error(res?.error?.message || `${name.toUpperCase()} API key không hợp lệ!`);
+            }
         } catch (error) {
-            alert(error.toString());
+            throw new Error(error?.message || `${name.toUpperCase()} API key không hợp lệ!`);
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
-        setKeys((prev) => ({ ...prev, [name]: e.target.value }));
+    const handleChange = (value, name: string) => {
+        setKeys((prev) => ({ ...prev, [name]: value }));
     };
 
     return (
         <div className="space-y-4">
-            {keyInputs.map(({ label, key, logo, placeholder }) => (
-                <div key={key} className="flex flex-col gap-2">
-                    <label className="text-sm font-semibold flex items-center gap-2">
-                        {logo && <img src={logo} alt={label} className="w-auto h-5 object-cover" />}
-                        {label} API Key
-                    </label>
-                    <div className="flex gap-2">
-                        <ApiKeyInput
-                            value={keys[key as keyof typeof keys]}
-                            onChange={(val) => handleChange({ target: { value: val } } as any, key)}
-                            placeholder={placeholder || `Nhập ${label} key...`}
-                        />
-
-                        <Button onClick={() => saveKey(label)}>Save</Button>
-                    </div>
-                </div>
+            {keyInputs.map(({ label, provider, logo, placeholder }: KeyInput) => (
+                <ApiKeyForm
+                    key={provider}
+                    label={label}
+                    provider={provider}
+                    logo={logo}
+                    placeholder={placeholder}
+                    value={keys[provider]}
+                    onChange={handleChange}
+                    onSave={saveKey}
+                />
             ))}
         </div>
     );

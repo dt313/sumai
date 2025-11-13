@@ -7,7 +7,7 @@ import SelectionButton from '../components/selection-button';
 
 import './content.css';
 
-import type { ModelType, RequestData } from '~types';
+import type { ModelType, SummaryRequestData } from '~types';
 import { storage } from '~utils/storage';
 
 export const config: PlasmoCSConfig = {
@@ -42,7 +42,7 @@ const ContentUI: React.FC = () => {
         setStreaming(true);
         const { defaultSetting } = await storage.get('defaultSetting');
 
-        const requestData: RequestData = {
+        const requestData: SummaryRequestData = {
             text,
             model: model || defaultSetting?.model || 'chatgpt',
             responseTextCount: textCount || Number(defaultSetting?.responseTextCount) || 200,
@@ -92,8 +92,6 @@ const ContentUI: React.FC = () => {
         setSelectedText(null);
         setButtonPos(null);
     };
-
-    console.log({ modalContent });
 
     return (
         <>
