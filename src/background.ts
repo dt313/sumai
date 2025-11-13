@@ -6,8 +6,6 @@ import getErrorMessage from '~utils/get-error-msg';
 import { storage } from '~utils/storage';
 import { validateProviderKey } from '~utils/validate-provider-key';
 
-console.log('🟢 Background script loaded!');
-
 chrome.runtime.onInstalled.addListener(() => {
     console.log('✅ Extension installed or reloaded');
 });
@@ -16,7 +14,7 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
     const { apiKeys } = await storage.get('apiKeys');
 
-    const ssuKey = apiKeys.ssu;
+    const ssuKey = apiKeys?.ssu || null;
 
     if (msg.type === 'SEND_SELECTED_TEXT') {
         const data: SummaryRequestData = msg.data;

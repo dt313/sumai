@@ -14,6 +14,7 @@ export type KeyInput = {
     provider: Provider;
     logo: string;
     placeholder?: string;
+    link: string;
 };
 
 export type SummaryRequestData = {

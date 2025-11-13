@@ -28,7 +28,7 @@ function IndexPopup() {
     }
 
     return (
-        <div className="w-[400px] p-4 font-sans">
+        <div className="w-[400px] p-4 font-sans bg-bg-light pb-[40px] overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between mb-4 border-b pb-2">
                 <h1 className="text-lg font-bold text-primary-light dark:text-primary-dark">Sumai</h1>

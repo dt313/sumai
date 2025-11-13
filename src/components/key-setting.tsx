@@ -31,14 +31,15 @@ function KeySetting() {
                 provider: name,
                 key: keys[name],
             };
+
+            console.log(name, keys[name]);
+
             // Đợi kết quả validate từ background
             const res = await new Promise<BackgroundResponse>((resolve) => {
                 chrome.runtime.sendMessage({ type: 'VALIDATE_KEY', data }, (response) => {
                     resolve(response);
                 });
             });
-
-            console.log('res', res);
 
             if (res?.ok && res?.data?.isValid) {
                 await storage.set({ apiKeys: newKeys });
@@ -57,12 +58,13 @@ function KeySetting() {
 
     return (
         <div className="space-y-4">
-            {keyInputs.map(({ label, provider, logo, placeholder }: KeyInput) => (
+            {keyInputs.map(({ label, provider, logo, placeholder, link }: KeyInput) => (
                 <ApiKeyForm
                     key={provider}
                     label={label}
                     provider={provider}
                     logo={logo}
+                    link={link}
                     placeholder={placeholder}
                     value={keys[provider]}
                     onChange={handleChange}

@@ -18,7 +18,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ value, onChange, placeholder 
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="flex-1 rounded-md border px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 pr-10"
+                className="flex-1 rounded-md border px-2 py-2 text-sm bg-transparent border-[1.5px] border-[#9e9e9e33] outline-none focus:border-[#9e9e9e] focus: pr-10"
             />
             <button
                 type="button"

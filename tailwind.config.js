@@ -25,6 +25,9 @@ module.exports = {
                     hover: '#dc2626',
                     disabled: '#fca5a5',
                 },
+                bg: {
+                    light: '#f0efea',
+                },
             },
         },
     },

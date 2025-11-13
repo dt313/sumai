@@ -11,12 +11,22 @@ type ApiKeyFormProps = {
     provider: Provider;
     logo?: string;
     placeholder?: string;
+    link: string;
     value: string;
     onChange: (val: string, provider: Provider) => void;
     onSave: (provider: Provider) => Promise<void>;
 };
 
-const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ label, provider, logo, placeholder, value, onChange, onSave }) => {
+const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
+    label,
+    provider,
+    logo,
+    link,
+    placeholder,
+    value,
+    onChange,
+    onSave,
+}) => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
@@ -41,10 +51,21 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ label, provider, logo, placehol
 
     return (
         <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold flex items-center gap-2">
-                {logo && <img src={logo} alt={label} className="w-auto h-5 object-cover" />}
-                {label} API Key
-            </label>
+            <div className="flex items-center gap-2">
+                <label className="text-sm font-semibold flex items-center gap-2">
+                    {logo && <img src={logo} alt={label} className="w-auto h-5 object-cover" />}
+                    {label} API Key
+                </label>
+
+                <a
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-orange-700 text-xs hover:underline"
+                >
+                    Get Key
+                </a>
+            </div>
 
             <div className="flex gap-2">
                 <ApiKeyInput

@@ -1,4 +1,12 @@
-import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { languageSelection, modelSelection } from '~configs/ui';
+import { TEXT_COUNT_MAX, TEXT_COUNT_MIN } from '~constants';
+
+import NumberInput from './number-input';
+import Selection from './selection';
+import SwitchButton from './switch-button';
 
 type SettingState = {
     model: string;
@@ -10,8 +18,8 @@ type SettingState = {
 };
 
 const defaultSetting: SettingState = {
-    model: 'openai',
-    language: 'vi',
+    model: 'chatgpt',
+    language: 'vietnamese',
     logoVisible: true,
     doubleClick: false,
     shiftSummarize: false,
@@ -20,6 +28,12 @@ const defaultSetting: SettingState = {
 
 function Setting() {
     const [setting, setSetting] = useState<SettingState>(defaultSetting);
+    const [model, setModel] = useState(defaultSetting?.model || 'chatgpt');
+    const [language, setLanguage] = useState(defaultSetting?.language || 'vietnamese');
+    const [textCount, setTextCount] = useState(defaultSetting?.summarizeCount || 200);
+    const [isDoubleClick, setIsDoubleClick] = useState(false);
+    const [isLogoVisible, setIsLogoVisible] = useState(false);
+    const [isShift, setIsShift] = useState(false);
 
     // Load from chrome.storage on mount
     useEffect(() => {
@@ -42,89 +56,84 @@ function Setting() {
         saveSetting({ ...setting, [key]: value });
     };
 
-    return (
-        <div className="p-4 w-full font-sans space-y-4">
-            {/* Model select */}
-            <div className="flex flex-col gap-1">
-                <label className="font-semibold text-sm">Select Model</label>
-                <select
-                    value={setting.model}
-                    onChange={(e) => handleChange('model', e.target.value)}
-                    className="rounded-md border px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                >
-                    <option value="openai">OpenAI</option>
-                    <option value="gemini">Gemini</option>
-                    <option value="anthropic">Anthropic</option>
-                </select>
-            </div>
+    const handleChangeModel = useCallback((value) => {
+        setModel(value);
+    }, []);
 
-            {/* Language select */}
-            <div className="flex flex-col gap-1">
-                <label className="font-semibold text-sm">Native Language (Summarization Text Language) </label>
-                <select
-                    value={setting.language}
-                    onChange={(e) => handleChange('language', e.target.value)}
-                    className="rounded-md border px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                >
-                    <option value="en">English</option>
-                    <option value="vi">Vietnamese</option>
-                    <option value="ko">Korean</option>
-                    <option value="ja">Japanese</option>
-                </select>
+    const handleChangeLanguage = useCallback((value) => {
+        setLanguage(value);
+    }, []);
+
+    const toggleDouble = useCallback(() => {
+        setIsDoubleClick(!isDoubleClick);
+    }, []);
+
+    const toggleLogoVisible = useCallback(() => {
+        setIsLogoVisible(!isLogoVisible);
+    }, []);
+
+    const toggleShift = useCallback(() => {
+        setIsShift(!isShift);
+    }, []);
+
+    const handleChangeTextCount = useCallback((value) => {
+        const clamped = Math.max(TEXT_COUNT_MIN, Math.min(value, TEXT_COUNT_MAX));
+        setTextCount(clamped);
+    }, []);
+
+    return (
+        <div className="w-full font-sans space-y-3">
+            {/* Model select */}
+
+            <Selection
+                label={'Summary Language'}
+                list={languageSelection}
+                value={language}
+                onChange={handleChangeLanguage}
+            />
+            <Selection label={'Model'} list={modelSelection} value={model} onChange={handleChangeModel} />
+
+            {/* Summarize count */}
+            <div className="flex gap-1 justify-center items-center">
+                <NumberInput
+                    value={textCount}
+                    onChange={handleChangeTextCount}
+                    min={TEXT_COUNT_MIN}
+                    max={TEXT_COUNT_MAX}
+                />
             </div>
 
             {/* Switches */}
             <div className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    checked={setting.logoVisible}
-                    onChange={(e) => handleChange('logoVisible', e.target.checked)}
-                    id="logoVisible"
-                    className="w-4 h-4"
-                />
-                <label htmlFor="logoVisible" className="text-sm">
+                <label htmlFor="logoVisible" className="text-sm font-medium flex-1">
                     Logo Visible
                 </label>
+                <SwitchButton
+                    checked={isLogoVisible}
+                    onChange={toggleLogoVisible}
+                    label="Logo Visibility"
+                    id="logoVisible"
+                />
             </div>
 
             <div className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    checked={setting.doubleClick}
-                    onChange={(e) => handleChange('doubleClick', e.target.checked)}
-                    id="doubleClick"
-                    className="w-4 h-4"
-                />
-                <label htmlFor="doubleClick" className="text-sm">
+                <label htmlFor="doubleClick" className="text-sm font-medium flex-1">
                     Double Click to Summarize
                 </label>
+                <SwitchButton
+                    checked={isDoubleClick}
+                    onChange={toggleDouble}
+                    label="Double Click to Summarize"
+                    id="doubleClick"
+                />
             </div>
 
             <div className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    checked={setting.shiftSummarize}
-                    onChange={(e) => handleChange('shiftSummarize', e.target.checked)}
-                    id="shiftSummarize"
-                    className="w-4 h-4"
-                />
-                <label htmlFor="shiftSummarize" className="text-sm">
+                <label htmlFor="shiftSummarize" className="text-sm font-medium flex-1">
                     Shift to Summarize
                 </label>
-            </div>
 
-            {/* Summarize count */}
-            <div className="flex flex-col gap-1">
-                <label className="font-semibold text-sm">Summarize Text Count</label>
-                <input
-                    type="number"
-                    min={10}
-                    max={1000}
-                    step={50}
-                    value={setting.summarizeCount}
-                    onChange={(e) => handleChange('summarizeCount', parseInt(e.target.value))}
-                    className="rounded-md border px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                />
+                <SwitchButton checked={isShift} onChange={toggleShift} label="Shift to Summarize" id="shiftSummarize" />
             </div>
         </div>
     );
