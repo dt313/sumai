@@ -25,6 +25,7 @@ const ContentUI: React.FC = () => {
     const [selectedText, setSelectedText] = useState<string | null>(null);
     const [buttonPos, setButtonPos] = useState<{ x: number; y: number } | null>(null);
     const [modalContent, setModalContent] = useState<string | null>(null);
+    const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
     const [streaming, setStreaming] = useState(false);
 
     const handleMouseUp = () => {
@@ -39,6 +40,7 @@ const ContentUI: React.FC = () => {
 
     const handleSend = async (text: string, model?: ModelType, language?: string, textCount?: number) => {
         setModalContent('');
+        setIsOpenModal(true);
         setStreaming(true);
         const { defaultSetting } = await storage.get('defaultSetting');
 
@@ -76,7 +78,6 @@ const ContentUI: React.FC = () => {
         language: string;
         textCount: number;
     }) => {
-        console.log({ selectedText });
         handleSend(selectedText, model, language, textCount);
     };
 
@@ -102,9 +103,14 @@ const ContentUI: React.FC = () => {
                     onOutsideClick={handleClickOutside}
                 />
             )}
-            {/* {modalContent && ( */}
-            <Modal content={modalContent} onClose={() => setModalContent(null)} onRefresh={handleRefresh} />
-            {/* )} */}
+            {isOpenModal && (
+                <Modal
+                    content={modalContent}
+                    onClose={() => setIsOpenModal(false)}
+                    onRefresh={handleRefresh}
+                    isStreaming={streaming}
+                />
+            )}
         </>
     );
 };

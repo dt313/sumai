@@ -1,5 +1,6 @@
 import { Copy, PencilLine, X } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import images from '~/assets/images';
 import Selection from '~components/content/selection.content';
@@ -12,14 +13,16 @@ import NumberInput from './number-input.content';
 
 type ModalProps = {
     content: string;
+    isStreaming: boolean;
     onClose: () => void;
     onRefresh: ({ model, language, textCount }: { model: ModelType; language: string; textCount: number }) => void;
 };
 
-const Modal: React.FC<ModalProps> = ({ content, onClose, onRefresh }) => {
+const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh }) => {
     const [model, setModel] = useState<ModelType>('chatgpt');
     const [language, setLanguage] = useState('en');
     const [textCount, setTextCount] = useState(200);
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         const initState = async () => {
@@ -49,9 +52,17 @@ const Modal: React.FC<ModalProps> = ({ content, onClose, onRefresh }) => {
         setTextCount(clamped);
     }, []);
 
+    const handleCopy = () => {
+        setCopied(true);
+
+        setTimeout(() => {
+            setCopied(false);
+        }, 2000);
+    };
+
     return (
         <>
-            <div className="plasmo-overlay" onClick={onClose}></div>
+            <div className="plasmo-overlay"></div>
 
             <div className="plasmo-modal" onMouseUp={(e) => e.stopPropagation()}>
                 {/* Header */}
@@ -86,9 +97,11 @@ const Modal: React.FC<ModalProps> = ({ content, onClose, onRefresh }) => {
                     </div>
 
                     <div className="right-side">
-                        <span className="icon-wrap">
-                            <Copy className="icon" strokeWidth={2.5} size={18} />
-                        </span>
+                        <CopyToClipboard text={isStreaming || copied ? '' : content} onCopy={handleCopy}>
+                            <span className={`icon-wrap ${isStreaming && 'disable'}`}>
+                                {!copied ? <Copy className="icon" strokeWidth={2.5} size={18} /> : '✅'}
+                            </span>
+                        </CopyToClipboard>
                         <span className="icon-wrap" onClick={onClose}>
                             <X className="icon" strokeWidth={2.5} size={18} />
                         </span>
