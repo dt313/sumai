@@ -1,18 +1,20 @@
 import { Copy, X } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import remarkGfm from 'remark-gfm';
 
 import images from '~/assets/images';
 import Selection from '~components/content/selection.content';
+import SpinLoading from '~components/spin-loading';
 import { languageSelection, modelSelection } from '~configs/ui';
 import { TEXT_COUNT_MAX, TEXT_COUNT_MIN } from '~constants';
 import type { ModelType } from '~types';
 import { storage } from '~utils/storage';
 
 import NumberInput from './number-input.content';
-
-import 'react-tooltip/dist/react-tooltip.css';
-
 import Tooltip from './tool-tip';
 
 type ModalProps = {
@@ -56,13 +58,17 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
         setTextCount(clamped);
     }, []);
 
-    const handleCopy = () => {
-        setCopied(true);
-
-        setTimeout(() => {
-            setCopied(false);
-        }, 2000);
+    const handleCopy = (text, result) => {
+        if (isStreaming || copied) return;
+        if (result) {
+            setCopied(true);
+            setTimeout(() => {
+                setCopied(false);
+            }, 2000);
+        }
     };
+
+    console.log(content);
 
     return (
         <>
@@ -107,8 +113,8 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                     </div>
 
                     <div className="right-side">
-                        <CopyToClipboard text={isStreaming || copied ? '' : content} onCopy={handleCopy}>
-                            <Tooltip content={copied ? 'Copied' : 'Copy'}>
+                        <Tooltip content={copied ? 'Copied' : 'Copy'}>
+                            <CopyToClipboard text={isStreaming || copied ? '' : content} onCopy={handleCopy}>
                                 <span
                                     data-tooltip-id="copy-tooltip"
                                     data-tooltip-content="Copy"
@@ -116,8 +122,8 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                                 >
                                     {!copied ? <Copy className="icon" strokeWidth={2.5} size={18} /> : '✅'}
                                 </span>
-                            </Tooltip>
-                        </CopyToClipboard>
+                            </CopyToClipboard>
+                        </Tooltip>
 
                         <Tooltip content="Close">
                             <span
@@ -134,7 +140,15 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
 
                 {/* Body content */}
                 <div className="plasmo-modal-content">
-                    <p>{content}</p>
+                    {!content ? (
+                        <div className="modal-loading">
+                            <img className="modal-loading-img" src={images.loading} />
+                        </div>
+                    ) : (
+                        <div className="markdown-body">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                        </div>
+                    )}
                 </div>
             </div>
         </>

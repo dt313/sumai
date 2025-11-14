@@ -55,7 +55,7 @@ const ContentUI: React.FC = () => {
 
         const chunkListener = (msg: any) => {
             if (msg.type === 'SUMMARY_CHUNK') {
-                setModalContent((prev) => prev + msg.chunk);
+                setModalContent((prev) => prev + msg?.chunk.replace(/([^\n])\n([^\n])/g, '$1\n\n$2'));
             }
         };
 
@@ -105,21 +105,21 @@ const ContentUI: React.FC = () => {
                     onOutsideClick={handleClickOutside}
                 />
             )}
-            {/* {isOpenModal && (
+            {isOpenModal && (
                 <Modal
                     content={modalContent}
                     onClose={() => setIsOpenModal(false)}
                     onRefresh={handleRefresh}
                     isStreaming={streaming}
                 />
-            )} */}
+            )}
 
-            <Modal
+            {/* <Modal
                 content={modalContent}
                 onClose={() => setIsOpenModal(false)}
                 onRefresh={handleRefresh}
                 isStreaming={streaming}
-            />
+            /> */}
         </>
     );
 };
