@@ -5,10 +5,17 @@ import { ChevronUpDownIcon } from '@heroicons/react/16/solid';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import { useMemo, useState } from 'react';
 
-type OptionType = {
-    label: string;
+type SelectionOptionType = {
+    label?: string;
     value: string;
     image?: string;
+};
+
+type SelectionType = {
+    label?: string;
+    list: SelectionOptionType[];
+    value: string | number;
+    onChange: (item: any) => void;
 };
 
 const Option = ({ label, value, image, onClick, checked }) => {
@@ -43,7 +50,7 @@ const Option = ({ label, value, image, onClick, checked }) => {
     );
 };
 
-export default function Selection({ label, list = [], value, onChange }) {
+export default function Selection({ label, list = [], value, onChange }: SelectionType) {
     const itemLabel = useMemo(() => {
         return list.find((i) => i.value === value).label;
     }, [value]);
@@ -53,7 +60,7 @@ export default function Selection({ label, list = [], value, onChange }) {
     }, [value]);
     return (
         <Listbox value={value} onChange={onChange}>
-            <Label className="block text-sm/6 font-medium">{label}</Label>
+            {label && <Label className="block text-sm/6 font-medium">{label}</Label>}
             <div className="relative">
                 <ListboxButton
                     className="

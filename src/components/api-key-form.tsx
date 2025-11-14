@@ -23,7 +23,7 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
     logo,
     link,
     placeholder,
-    value,
+    value = '',
     onChange,
     onSave,
 }) => {
@@ -74,7 +74,7 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
                     placeholder={placeholder || `Nhập ${label} key...`}
                 />
                 {!success ? (
-                    <Button onClick={handleSave} loading={loading} disabled={success || loading}>
+                    <Button onClick={handleSave} loading={loading} disabled={success || loading || !value}>
                         Save
                     </Button>
                 ) : (

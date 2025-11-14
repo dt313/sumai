@@ -1,8 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import { Copy, PencilLine, X } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import images from '~/assets/images';
-import type { ModelType, SummaryRequestData } from '~types';
+import Selection from '~components/content/selection.content';
+import { languageSelection, modelSelection } from '~configs/ui';
+import { TEXT_COUNT_MAX, TEXT_COUNT_MIN } from '~constants';
+import type { ModelType } from '~types';
 import { storage } from '~utils/storage';
+
+import NumberInput from './number-input.content';
 
 type ModalProps = {
     content: string;
@@ -30,6 +36,19 @@ const Modal: React.FC<ModalProps> = ({ content, onClose, onRefresh }) => {
         onRefresh({ model, language, textCount });
     };
 
+    const handleChangeLanguage = useCallback((value) => {
+        setLanguage(value);
+    }, []);
+
+    const handleChangeModel = useCallback((value) => {
+        setModel(value);
+    }, []);
+
+    const handleChangeTextCount = useCallback((value) => {
+        const clamped = Math.max(TEXT_COUNT_MIN, Math.min(value, TEXT_COUNT_MAX));
+        setTextCount(clamped);
+    }, []);
+
     return (
         <>
             <div className="plasmo-overlay" onClick={onClose}></div>
@@ -37,44 +56,22 @@ const Modal: React.FC<ModalProps> = ({ content, onClose, onRefresh }) => {
             <div className="plasmo-modal" onMouseUp={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="plasmo-modal-header">
-                    <img src={images.openai} alt="Logo" className="plasmo-modal-logo" />
-
+                    {/* <img src={images.logo} alt="Logo" className="plasmo-modal-logo" /> */}
                     <div className="filter">
                         <div className="filter-item">
-                            <label htmlFor="model-select">Model:</label>
-                            <select
-                                id="model-select"
-                                value={model}
-                                onChange={(e) => setModel(e.target.value as ModelType)}
-                                className="plasmo-select"
-                            >
-                                <option value="chatgpt">OpenAI</option>
-                                <option value="gemini">Gemini</option>
-                                <option value="claude">Anthropic</option>
-                            </select>
+                            <Selection value={model} onChange={handleChangeModel} list={modelSelection} />
                         </div>
 
                         <div className="filter-item">
-                            <label htmlFor="lang-select">Language:</label>
-                            <select
-                                id="lang-select"
-                                value={language}
-                                onChange={(e) => setLanguage(e.target.value)}
-                                className="plasmo-select"
-                            >
-                                <option value="english">English</option>
-                                <option value="vietnamese">Vietnamese</option>
-                                <option value="korea">Korean</option>
-                            </select>
+                            <Selection value={language} onChange={handleChangeLanguage} list={languageSelection} />
                         </div>
 
                         <div className="filter-item">
-                            <label htmlFor="text-count">Text Count:</label>
-                            <input
+                            <NumberInput
                                 id="text-count"
                                 type="number"
                                 value={textCount}
-                                onChange={(e) => setTextCount(parseInt(e.target.value))}
+                                onChange={handleChangeTextCount}
                                 min={10}
                                 max={1000}
                                 step={50}
@@ -82,9 +79,19 @@ const Modal: React.FC<ModalProps> = ({ content, onClose, onRefresh }) => {
                             />
                         </div>
 
-                        <button className="refresh-btn" onClick={handleRefresh}>
-                            Refresh
+                        <button className="re-summary-btn" onClick={handleRefresh}>
+                            {/* <PencilLine className="pen-icon" size={18} /> */}
+                            <img className="re-summary-img" src={images.logo} />
                         </button>
+                    </div>
+
+                    <div className="right-side">
+                        <span className="icon-wrap">
+                            <Copy className="icon" strokeWidth={2.5} size={18} />
+                        </span>
+                        <span className="icon-wrap" onClick={onClose}>
+                            <X className="icon" strokeWidth={2.5} size={18} />
+                        </span>
                     </div>
                 </div>
 

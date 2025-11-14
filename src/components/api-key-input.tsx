@@ -8,7 +8,7 @@ type ApiKeyInputProps = {
     placeholder?: string;
 };
 
-const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ value, onChange, placeholder }) => {
+const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ value = '', onChange, placeholder }) => {
     const [show, setShow] = useState(false);
 
     return (

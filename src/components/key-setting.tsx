@@ -32,8 +32,6 @@ function KeySetting() {
                 key: keys[name],
             };
 
-            console.log(name, keys[name]);
-
             // Đợi kết quả validate từ background
             const res = await new Promise<BackgroundResponse>((resolve) => {
                 chrome.runtime.sendMessage({ type: 'VALIDATE_KEY', data }, (response) => {

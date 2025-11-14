@@ -1,31 +1,48 @@
+* {
+    --bg-color: #f0eaea;
+    --text-color: #222;
+    --accent: #06b6d4;
+    --border-color: #80808044;
+    --font-family: ui-sans-serif, system-ui, -apple-system, 'system-ui', 'Segoe UI', Roboto, 'Noto Sans', Ubuntu,
+        Cantarell, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    font-family: var(--font-family);
+    box-sizing: border-box;
+}
+
 .selection-btn {
-    background: linear-gradient(135deg, #00a3cc, #00b8e6);
+    background-color: var(--bg-color);
     color: white;
     border: none;
-    padding: 8px 16px;
     border-radius: 10px;
     font-size: 14px;
-    font-weight: 600;
-    width: 100px;
     cursor: pointer;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
     transition: all 0.25s ease;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
     user-select: none;
+    height: 40px;
+    width: 40px;
     transition: all 0.3 cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
 .selection-btn:hover {
     transform: scale(1.05);
-    background: linear-gradient(135deg, #00b8e6, #00a3cc);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .selection-btn:active {
     transform: scale(0.97);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
 }
 
 /* Modal */
@@ -47,16 +64,20 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: #fff;
+    background-color: #3dc8e066;
+    backdrop-filter: blur(12px);
     min-height: 200px;
     max-width: 700px;
     width: 100%;
-    width: fit-content;
-    border-radius: 14px;
+    padding: 4px;
+    border-radius: 20px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
     z-index: 999999;
-    width: 92%;
+    border: 1.5px solid #989898;
     animation: plasmo-fade-in 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
     overflow: hidden;
 }
 
@@ -64,67 +85,296 @@
 .plasmo-modal-header {
     display: flex;
     align-items: center;
-    padding: 18px;
+    padding: 12px 4px;
     justify-content: space-between;
-    background-color: #b6b6b6;
+    background-color: transparent;
 }
 
 .plasmo-modal-logo {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
 }
 
 .filter {
     flex: 1;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 12px;
 }
 
 .filter-item {
     display: flex;
-    /* flex-direction: column; */
     align-items: center;
     flex-wrap: wrap;
     font-size: 12px;
-    color: #333;
-    gap: 4px;
+    color: var(--text-color);
+    max-width: 120px;
+    width: fit-content;
 }
 
-.filter-item label {
+/* Resumary button */
+
+.re-summary-btn {
+    background-color: var(--bg-color);
+    outline: none;
+    border: 1.5px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.re-summary-btn:hover {
+    opacity: 0.8;
+}
+
+.re-summary-img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+/* Selection */
+
+.selection-container {
+    width: 100%;
+    position: relative;
+    font-family: sans-serif;
+}
+
+.selection-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
     font-weight: 500;
 }
 
-.plasmo-select,
-.plasmo-input {
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 6px 8px;
-    font-size: 13px;
-    outline: none;
-    transition: all 0.2s ease;
+.selection-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 8px 12px;
+    background-color: var(--bg-color);
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border 0.2s ease;
 }
 
-.plasmo-select:hover,
-.plasmo-input:hover {
-    border-color: #00a3cc;
+.selection-button:hover {
+    border-color: #9ca3af;
 }
 
-.plasmo-select:focus,
-.plasmo-input:focus {
-    border-color: #00a3cc;
-    box-shadow: 0 0 0 2px rgba(0, 163, 204, 0.2);
+.selection-button.open {
+    border-color: var(--accent);
+}
+
+.selection-selected-img {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.selected-label {
+    font-weight: 500;
+}
+
+.selection-chevron {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+}
+
+.selection-button.open .selection-chevron {
+    transform: rotate(180deg);
+}
+
+.selection-options {
+    position: absolute;
+    width: 100%;
+    margin-top: 4px;
+    background: white;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    max-height: 120px;
+    height: fit-content;
+    overflow-y: auto;
+    z-index: 20;
+    position: absolute;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.selection-option {
+    padding: 8px 36px 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    position: relative;
+    font-weight: 500;
+}
+
+.selection-option:hover {
+    background: #e5e5e5;
+}
+
+.selection-option img {
+    width: 16;
+    height: 16;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.selected-button {
+    display: flex;
+    align-items: center;
+    max-width: 64px;
+    width: 100%;
+    overflow: hidden;
+    margin-right: 12px;
+}
+
+.selection-check {
+    position: absolute;
+    right: 10px;
+    color: #0891b2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Body */
 .plasmo-modal-content {
-    color: #333;
-    padding: 18px;
+    flex: 1;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    /* background-color: #ffffff44; */
 
+    height: 100%;
+    padding: 18px;
+    border-radius: 14px;
     line-height: 1.5;
-    font-size: 14px;
+    font-size: 16px;
     word-break: break-word;
+    font-weight: 500;
+}
+
+/* Number Input */
+
+.ni-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ni-label {
+    font-weight: 500;
+    font-size: 14px;
+    flex: 1;
+}
+
+.ni-input-box {
+    position: relative;
+}
+
+.ni-input {
+    width: 100%;
+    padding: 8px 32px 8px 12px;
+    font-size: 14px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1.5px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition:
+        border 0.2s ease,
+        box-shadow 0.2s ease;
+    appearance: textfield;
+    position: relative;
+    font-weight: 500;
+}
+
+.ni-input:hover {
+    border-color: #9ca3af;
+}
+
+.ni-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.ni-controls {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-right: 4px;
+    pointer-events: none;
+}
+
+.ni-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s ease;
+    pointer-events: auto;
+}
+
+.ni-btn:hover {
+    color: var(--accent);
+}
+
+.ni-btn svg {
+    display: block;
+}
+
+/* Right side */
+
+.right-side {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.icon-wrap {
+    background-color: var(--bg-color);
+    outline: none;
+    border: 1.5px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-wrap:hover {
+    opacity: 0.8;
+}
+
+.icon {
+    color: #999;
 }
 
 /* Animation */
@@ -137,4 +387,15 @@
         opacity: 1;
         transform: translate(-50%, -50%);
     }
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Ẩn nút tăng/giảm mặc định trong Firefox */
+input[type='number'] {
+    -moz-appearance: textfield;
 }

@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
+import images from '~assets/images';
+
 type ButtonProps = {
     text: string;
     x: number;
@@ -42,7 +44,7 @@ const SelectionButton: React.FC<ButtonProps> = ({ text, x, y, onSend, onOutsideC
                 onSend(text);
             }}
         >
-            🚀
+            <img src={images.logo} className="btn-logo" />
         </button>
     );
 };

@@ -2,8 +2,8 @@ import styles from 'data-text:./content.css';
 import type { PlasmoCSConfig } from 'plasmo';
 import React, { useEffect, useState } from 'react';
 
-import Modal from '../components/modal';
-import SelectionButton from '../components/selection-button';
+import Modal from '../components/content/modal.content';
+import SelectionButton from '../components/content/selection-button.content';
 
 import './content.css';
 
@@ -65,8 +65,6 @@ const ContentUI: React.FC = () => {
             setStreaming(false);
             chrome.runtime.onMessage.removeListener(chunkListener);
         });
-
-        setSelectedText(null);
     };
 
     const handleRefresh = async ({
@@ -78,6 +76,7 @@ const ContentUI: React.FC = () => {
         language: string;
         textCount: number;
     }) => {
+        console.log({ selectedText });
         handleSend(selectedText, model, language, textCount);
     };
 
@@ -89,13 +88,12 @@ const ContentUI: React.FC = () => {
     }, []);
 
     const handleClickOutside = () => {
-        setSelectedText(null);
         setButtonPos(null);
     };
 
     return (
         <>
-            {selectedText && buttonPos && (
+            {buttonPos && (
                 <SelectionButton
                     text={selectedText}
                     x={buttonPos.x}
@@ -104,9 +102,9 @@ const ContentUI: React.FC = () => {
                     onOutsideClick={handleClickOutside}
                 />
             )}
-            {modalContent && (
-                <Modal content={modalContent} onClose={() => setModalContent(null)} onRefresh={handleRefresh} />
-            )}
+            {/* {modalContent && ( */}
+            <Modal content={modalContent} onClose={() => setModalContent(null)} onRefresh={handleRefresh} />
+            {/* )} */}
         </>
     );
 };
