@@ -78,7 +78,6 @@
     display: flex;
     flex-direction: column;
     user-select: none;
-    overflow: hidden;
 }
 
 /* Header */
@@ -259,7 +258,7 @@
     color: var(--text-color);
     background-color: var(--bg-color);
     /* background-color: #ffffff44; */
-
+    max-height: 800px;
     height: 100%;
     padding: 18px;
     border-radius: 14px;
@@ -267,6 +266,7 @@
     font-size: 16px;
     word-break: break-word;
     font-weight: 500;
+    overflow: auto;
 }
 
 /* Number Input */
@@ -381,6 +381,8 @@
 .icon {
     color: #999;
 }
+
+/* Tool-tip */
 
 /* Animation */
 @keyframes plasmo-fade-in {

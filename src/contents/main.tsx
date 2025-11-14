@@ -1,14 +1,16 @@
-import styles from 'data-text:./content.css';
+import contentStyle from 'data-text:./styles/content.css';
+import toolTips from 'data-text:./styles/tooltip.css';
 import type { PlasmoCSConfig } from 'plasmo';
 import React, { useEffect, useState } from 'react';
 
-import Modal from '../components/content/modal.content';
-import SelectionButton from '../components/content/selection-button.content';
-
-import './content.css';
+// import './styles/content.css';
+// import './styles/tooltip.css';
 
 import type { ModelType, SummaryRequestData } from '~types';
 import { storage } from '~utils/storage';
+
+import Modal from '../components/content/modal.content';
+import SelectionButton from '../components/content/selection-button.content';
 
 export const config: PlasmoCSConfig = {
     matches: ['<all_urls>'],
@@ -17,7 +19,7 @@ export const config: PlasmoCSConfig = {
 
 export const getStyle = () => {
     const style = document.createElement('style');
-    style.textContent = styles;
+    style.textContent = contentStyle + toolTips;
     return style;
 };
 
@@ -103,14 +105,21 @@ const ContentUI: React.FC = () => {
                     onOutsideClick={handleClickOutside}
                 />
             )}
-            {isOpenModal && (
+            {/* {isOpenModal && (
                 <Modal
                     content={modalContent}
                     onClose={() => setIsOpenModal(false)}
                     onRefresh={handleRefresh}
                     isStreaming={streaming}
                 />
-            )}
+            )} */}
+
+            <Modal
+                content={modalContent}
+                onClose={() => setIsOpenModal(false)}
+                onRefresh={handleRefresh}
+                isStreaming={streaming}
+            />
         </>
     );
 };

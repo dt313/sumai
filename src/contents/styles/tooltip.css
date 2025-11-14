@@ -1,0 +1,100 @@
+* {
+    --bg-color: #f0eaea;
+    --text-color: #333;
+    --accent: #06b6d4;
+    --border-color: #80808044;
+    --font-family: ui-sans-serif, system-ui, -apple-system, 'system-ui', 'Segoe UI', Roboto, 'Noto Sans', Ubuntu,
+        Cantarell, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    font-family: var(--font-family);
+    box-sizing: border-box;
+}
+
+.tooltip-wrapper {
+    display: inline-block;
+    position: relative;
+}
+
+.tooltip-box {
+    position: absolute;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 1000;
+    font-weight: 500;
+    opacity: 0.95;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+/* Mũi tên */
+.tooltip-box::after {
+    content: '';
+    position: absolute;
+    border-style: solid;
+}
+
+/* Các vị trí */
+.tooltip-top {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 6px;
+}
+
+.tooltip-top::after {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px 6px 0 6px;
+    border-color: var(--bg-color) transparent transparent transparent;
+}
+
+.tooltip-bottom {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
+}
+
+.tooltip-bottom::after {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 6px 6px 6px;
+    border-color: transparent transparent var(--bg-color) transparent;
+}
+
+.tooltip-left {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 6px;
+}
+
+.tooltip-left::after {
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 6px 0 6px 6px;
+    border-color: transparent transparent transparent var(--bg-color);
+}
+
+.tooltip-right {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 6px;
+}
+
+.tooltip-right::after {
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 6px 6px 6px 0;
+    border-color: transparent var(--bg-color) transparent transparent;
+}

@@ -1,4 +1,4 @@
-import { Copy, PencilLine, X } from 'lucide-react';
+import { Copy, X } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
@@ -10,6 +10,10 @@ import type { ModelType } from '~types';
 import { storage } from '~utils/storage';
 
 import NumberInput from './number-input.content';
+
+import 'react-tooltip/dist/react-tooltip.css';
+
+import Tooltip from './tool-tip';
 
 type ModalProps = {
     content: string;
@@ -89,22 +93,42 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                                 className="plasmo-input"
                             />
                         </div>
-
-                        <button className="re-summary-btn" onClick={handleRefresh}>
-                            {/* <PencilLine className="pen-icon" size={18} /> */}
-                            <img className="re-summary-img" src={images.logo} />
-                        </button>
+                        <Tooltip content="Summary">
+                            <button
+                                className="re-summary-btn"
+                                onClick={handleRefresh}
+                                data-tooltip-id="summary-tooltip"
+                                data-tooltip-content="Summary"
+                            >
+                                {/* <PencilLine className="pen-icon" size={18} /> */}
+                                <img className="re-summary-img" src={images.logo} />
+                            </button>
+                        </Tooltip>
                     </div>
 
                     <div className="right-side">
                         <CopyToClipboard text={isStreaming || copied ? '' : content} onCopy={handleCopy}>
-                            <span className={`icon-wrap ${isStreaming && 'disable'}`}>
-                                {!copied ? <Copy className="icon" strokeWidth={2.5} size={18} /> : '✅'}
-                            </span>
+                            <Tooltip content={copied ? 'Copied' : 'Copy'}>
+                                <span
+                                    data-tooltip-id="copy-tooltip"
+                                    data-tooltip-content="Copy"
+                                    className={`icon-wrap ${isStreaming && 'disable'}`}
+                                >
+                                    {!copied ? <Copy className="icon" strokeWidth={2.5} size={18} /> : '✅'}
+                                </span>
+                            </Tooltip>
                         </CopyToClipboard>
-                        <span className="icon-wrap" onClick={onClose}>
-                            <X className="icon" strokeWidth={2.5} size={18} />
-                        </span>
+
+                        <Tooltip content="Close">
+                            <span
+                                data-tooltip-id="close-tooltip"
+                                data-tooltip-content="Close"
+                                className="icon-wrap"
+                                onClick={onClose}
+                            >
+                                <X className="icon" strokeWidth={2.5} size={18} />
+                            </span>
+                        </Tooltip>
                     </div>
                 </div>
 
