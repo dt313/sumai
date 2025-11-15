@@ -1,5 +1,5 @@
 import { Copy, X } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -25,50 +25,53 @@ type ModalProps = {
 };
 
 const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh }) => {
-    const [model, setModel] = useState<ModelType>('chatgpt');
-    const [language, setLanguage] = useState('en');
-    const [textCount, setTextCount] = useState(200);
+    const [setting, setSetting] = useState({
+        model: 'chatgpt' as ModelType,
+        language: 'vietnamese',
+        textCount: 200,
+    });
     const [copied, setCopied] = useState(false);
+    const copyTimeout = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        const initState = async () => {
-            const { defaultSetting } = await storage.get('defaultSetting');
-            setTextCount(defaultSetting?.responseTextCount || 200);
-            setLanguage(defaultSetting?.nativeLanguage || 'vietnamese');
-            setModel(defaultSetting?.model || 'chatgpt');
+        const loadSetting = async () => {
+            const { setting: defaultSetting } = await storage.get('setting');
+            if (defaultSetting) {
+                setSetting((prev) => ({
+                    ...prev,
+                    model: defaultSetting.model || prev.model,
+                    language: defaultSetting.language || prev.language,
+                    textCount: defaultSetting.textCount || prev.textCount,
+                }));
+            }
         };
-
-        initState();
-    }, [storage]);
-
-    const handleRefresh = async () => {
-        onRefresh({ model, language, textCount });
-    };
-
-    const handleChangeLanguage = useCallback((value) => {
-        setLanguage(value);
+        loadSetting();
     }, []);
 
-    const handleChangeModel = useCallback((value) => {
-        setModel(value);
+    const handleRefresh = useCallback(() => {
+        onRefresh(setting);
+    }, [onRefresh, setting]);
+
+    const updateSetting = useCallback((key: keyof typeof setting, value: any) => {
+        setSetting((prev) => ({ ...prev, [key]: value }));
     }, []);
 
-    const handleChangeTextCount = useCallback((value) => {
-        const clamped = Math.max(TEXT_COUNT_MIN, Math.min(value, TEXT_COUNT_MAX));
-        setTextCount(clamped);
-    }, []);
+    const clampTextCount = useCallback(
+        (value) => {
+            updateSetting('textCount', Math.max(TEXT_COUNT_MIN, Math.min(value, TEXT_COUNT_MAX)));
+        },
+        [updateSetting],
+    );
 
-    const handleCopy = (text, result) => {
-        if (isStreaming || copied) return;
-        if (result) {
+    const handleCopy = useCallback(
+        (_: string, result: boolean) => {
+            if (isStreaming || copied || !result) return;
             setCopied(true);
-            setTimeout(() => {
-                setCopied(false);
-            }, 2000);
-        }
-    };
-
-    console.log(content);
+            if (copyTimeout.current) clearTimeout(copyTimeout.current);
+            copyTimeout.current = setTimeout(() => setCopied(false), 2000);
+        },
+        [isStreaming, copied],
+    );
 
     return (
         <>
@@ -80,21 +83,28 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                     {/* <img src={images.logo} alt="Logo" className="plasmo-modal-logo" /> */}
                     <div className="filter">
                         <div className="filter-item">
-                            <Selection value={model} onChange={handleChangeModel} list={modelSelection} />
+                            <Selection
+                                value={setting.model}
+                                onChange={(v) => updateSetting('model', v)}
+                                list={modelSelection}
+                            />
                         </div>
 
                         <div className="filter-item">
-                            <Selection value={language} onChange={handleChangeLanguage} list={languageSelection} />
+                            <Selection
+                                value={setting.language}
+                                onChange={(v) => updateSetting('language', v)}
+                                list={languageSelection}
+                            />
                         </div>
 
                         <div className="filter-item">
                             <NumberInput
                                 id="text-count"
-                                type="number"
-                                value={textCount}
-                                onChange={handleChangeTextCount}
-                                min={10}
-                                max={1000}
+                                value={setting.textCount}
+                                onChange={(v) => clampTextCount(v)}
+                                min={TEXT_COUNT_MIN}
+                                max={TEXT_COUNT_MAX}
                                 step={50}
                                 className="plasmo-input"
                             />

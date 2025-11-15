@@ -2,24 +2,24 @@ import images from '~/assets/images';
 import type { KeyInput } from '~types';
 
 export const keyInputs: readonly KeyInput[] = [
-    {
-        label: 'OpenAI',
-        provider: 'chatgpt',
-        logo: images.openai,
-        link: 'https://platform.openai.com/api-keys',
-    },
-    {
-        label: 'Gemini',
-        provider: 'gemini',
-        logo: images.gemini,
-        link: 'https://aistudio.google.com/app/api-keys',
-    },
-    {
-        label: 'Claude',
-        provider: 'claude',
-        logo: images.claude,
-        link: 'https://console.anthropic.com/settings/admin-keys',
-    },
+    // {
+    //     label: 'OpenAI',
+    //     provider: 'chatgpt',
+    //     logo: images.openai,
+    //     link: 'https://platform.openai.com/api-keys',
+    // },
+    // {
+    //     label: 'Gemini',
+    //     provider: 'gemini',
+    //     logo: images.gemini,
+    //     link: 'https://aistudio.google.com/app/api-keys',
+    // },
+    // {
+    //     label: 'Claude',
+    //     provider: 'claude',
+    //     logo: images.claude,
+    //     link: 'https://console.anthropic.com/settings/admin-keys',
+    // },
     {
         label: 'SSU',
         provider: 'ssu',

@@ -1,4 +1,13 @@
+import type { ModelType, SettingState } from '~types';
+
+export const SSU_MODEL_ENDPOINTS: Record<ModelType, string> = {
+    chatgpt: 'https://factchat-cloud.mindlogic.ai/v1/api/openai/chat/completions',
+    claude: 'https://factchat-cloud.mindlogic.ai/v1/api/anthropic/messages',
+    gemini: 'https://factchat-cloud.mindlogic.ai/v1/api/google/models/generate-content-stream',
+};
+
 export const SSU_API_URL = 'https://factchat-cloud.mindlogic.ai/v1/api/openai/chat/completions';
+
 export const CHATGPT_API_URL = 'https://factchat-cloud.mindlogic.ai/v1/api/openai/chat/completions';
 export const GEMINI_API_URL = 'https://factchat-cloud.mindlogic.ai/v1/api/openai/chat/completions';
 export const CLAUDE_API_URL = 'https://factchat-cloud.mindlogic.ai/v1/api/openai/chat/completions';
@@ -10,3 +19,12 @@ export const CLAUDE_LABEL = 'claude';
 
 export const TEXT_COUNT_MIN = 50;
 export const TEXT_COUNT_MAX = 1000;
+
+export const defaultSetting: SettingState = {
+    model: 'chatgpt',
+    language: 'vietnamese',
+    isLogoVisible: true,
+    isDoubleClick: true,
+    isShift: true,
+    textCount: 200,
+};

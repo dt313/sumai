@@ -1,140 +1,85 @@
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { languageSelection, modelSelection } from '~configs/ui';
-import { TEXT_COUNT_MAX, TEXT_COUNT_MIN } from '~constants';
+import { defaultSetting, TEXT_COUNT_MAX, TEXT_COUNT_MIN } from '~constants';
+import type { SettingState } from '~types';
+import { storage } from '~utils/storage';
 
 import NumberInput from './number-input';
 import Selection from './selection';
 import SwitchButton from './switch-button';
 
-type SettingState = {
-    model: string;
-    language: string;
-    logoVisible: boolean;
-    doubleClick: boolean;
-    shiftSummarize: boolean;
-    summarizeCount: number;
-};
-
-const defaultSetting: SettingState = {
-    model: 'chatgpt',
-    language: 'vietnamese',
-    logoVisible: true,
-    doubleClick: false,
-    shiftSummarize: false,
-    summarizeCount: 100,
-};
-
 function Setting() {
-    const [setting, setSetting] = useState<SettingState>(defaultSetting);
-    const [model, setModel] = useState(defaultSetting?.model || 'chatgpt');
-    const [language, setLanguage] = useState(defaultSetting?.language || 'vietnamese');
-    const [textCount, setTextCount] = useState(defaultSetting?.summarizeCount || 200);
-    const [isDoubleClick, setIsDoubleClick] = useState(false);
-    const [isLogoVisible, setIsLogoVisible] = useState(false);
-    const [isShift, setIsShift] = useState(false);
+    const [setting, setSetting] = useState<SettingState>({
+        model: defaultSetting?.model || 'chatgpt',
+        language: defaultSetting?.language || 'vietnamese',
+        textCount: defaultSetting?.textCount || 200,
+        isDoubleClick: defaultSetting?.isDoubleClick || true,
+        isLogoVisible: defaultSetting?.isLogoVisible || true,
+        isShift: defaultSetting?.isShift || true,
+    });
 
-    // Load from chrome.storage on mount
     useEffect(() => {
-        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-            chrome.storage.local.get(['userSetting'], (result) => {
-                if (result.userSetting) setSetting(result.userSetting);
-            });
-        }
+        const loadSetting = async () => {
+            const { setting: defaultSetting } = await storage.get('setting');
+
+            if (defaultSetting) {
+                setSetting((prev) => ({ ...prev, ...defaultSetting }));
+            }
+        };
+        loadSetting();
     }, []);
 
-    // Save setting to chrome.storage
-    const saveSetting = (newSetting: SettingState) => {
-        setSetting(newSetting);
-        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-            chrome.storage.local.set({ userSetting: newSetting });
-        }
-    };
+    const update = useCallback(
+        async (key: string, value: any) => {
+            const newSetting = { ...setting, [key]: value };
+            setSetting(newSetting);
+            await storage.set({ setting: newSetting });
+        },
+        [setting],
+    );
 
-    const handleChange = (key: keyof SettingState, value: any) => {
-        saveSetting({ ...setting, [key]: value });
-    };
-
-    const handleChangeModel = useCallback((value) => {
-        setModel(value);
-    }, []);
-
-    const handleChangeLanguage = useCallback((value) => {
-        setLanguage(value);
-    }, []);
-
-    const toggleDouble = useCallback((value) => {
-        setIsDoubleClick(value);
-    }, []);
-
-    const toggleLogoVisible = useCallback((value) => {
-        setIsLogoVisible(value);
-    }, []);
-
-    const toggleShift = useCallback((value) => {
-        setIsShift(value);
-    }, []);
-
-    const handleChangeTextCount = useCallback((value) => {
-        const clamped = Math.max(TEXT_COUNT_MIN, Math.min(value, TEXT_COUNT_MAX));
-        setTextCount(clamped);
-    }, []);
+    const clampTextCount = useCallback(
+        (value) => {
+            update('textCount', Math.max(TEXT_COUNT_MIN, Math.min(value, TEXT_COUNT_MAX)));
+        },
+        [update],
+    );
 
     return (
         <div className="w-full font-sans space-y-3">
             {/* Model select */}
 
             <Selection
-                label={'Summary Language'}
+                label="Summary Language"
                 list={languageSelection}
-                value={language}
-                onChange={handleChangeLanguage}
+                value={setting.language}
+                onChange={(v) => update('language', v)}
             />
-            <Selection label={'Model'} list={modelSelection} value={model} onChange={handleChangeModel} />
+            <Selection label="Model" list={modelSelection} value={setting.model} onChange={(v) => update('model', v)} />
 
             {/* Summarize count */}
             <div className="flex gap-1 justify-center items-center">
                 <NumberInput
-                    value={textCount}
-                    onChange={handleChangeTextCount}
+                    value={setting.textCount}
+                    onChange={clampTextCount}
                     min={TEXT_COUNT_MIN}
                     max={TEXT_COUNT_MAX}
                 />
             </div>
 
-            {/* Switches */}
-            <div className="flex items-center gap-2">
-                <label htmlFor="logoVisible" className="text-sm font-medium flex-1">
-                    Logo Visible
-                </label>
-                <SwitchButton
-                    checked={isLogoVisible}
-                    onChange={toggleLogoVisible}
-                    label="Logo Visibility"
-                    id="logoVisible"
-                />
-            </div>
-
-            <div className="flex items-center gap-2">
-                <label htmlFor="doubleClick" className="text-sm font-medium flex-1">
-                    Double Click to Summarize
-                </label>
-                <SwitchButton
-                    checked={isDoubleClick}
-                    onChange={toggleDouble}
-                    label="Double Click to Summarize"
-                    id="doubleClick"
-                />
-            </div>
-
-            <div className="flex items-center gap-2">
-                <label htmlFor="shiftSummarize" className="text-sm font-medium flex-1">
-                    Shift to Summarize
-                </label>
-
-                <SwitchButton checked={isShift} onChange={toggleShift} label="Shift to Summarize" id="shiftSummarize" />
-            </div>
+            {[
+                { id: 'logoVisible', label: 'Logo Visible', key: 'isLogoVisible' },
+                { id: 'doubleClick', label: 'Double Click to Summarize', key: 'isDoubleClick' },
+                { id: 'shiftSummarize', label: 'Shift to Summarize', key: 'isShift' },
+            ].map(({ id, label, key }) => (
+                <div key={id} className="flex items-center gap-2">
+                    <label htmlFor={id} className="text-sm font-medium flex-1">
+                        {label}
+                    </label>
+                    <SwitchButton id={id} label={label} checked={setting[key]} onChange={(v) => update(key, v)} />
+                </div>
+            ))}
         </div>
     );
 }

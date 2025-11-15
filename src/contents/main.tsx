@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 // import './styles/content.css';
 // import './styles/tooltip.css';
 
-import type { ModelType, SummaryRequestData } from '~types';
+import type { ModelType, SettingState, SummaryRequestData } from '~types';
 import { storage } from '~utils/storage';
 
 import Modal from '../components/content/modal.content';
@@ -40,35 +40,43 @@ const ContentUI: React.FC = () => {
         setButtonPos({ x: rect.right + window.scrollX, y: rect.bottom + window.scrollY });
     };
 
-    const handleSend = async (text: string, model?: ModelType, language?: string, textCount?: number) => {
-        setModalContent('');
-        setIsOpenModal(true);
-        setStreaming(true);
-        const { defaultSetting } = await storage.get('defaultSetting');
-
-        const requestData: SummaryRequestData = {
-            text,
-            model: model || defaultSetting?.model || 'chatgpt',
-            responseTextCount: textCount || Number(defaultSetting?.responseTextCount) || 200,
-            nativeLanguage: language || defaultSetting?.nativeLanguage || 'vietnamese',
-        };
-
+    useEffect(() => {
         const chunkListener = (msg: any) => {
             if (msg.type === 'SUMMARY_CHUNK') {
-                setModalContent((prev) => prev + msg?.chunk.replace(/([^\n])\n([^\n])/g, '$1\n\n$2'));
+                setModalContent((prev) => prev + msg.chunk.replace(/([^\n])\n([^\n])/g, '$1\n\n$2'));
             }
         };
 
         chrome.runtime.onMessage.addListener(chunkListener);
 
-        // Gửi text tới background
-        chrome.runtime.sendMessage({ type: 'SEND_SELECTED_TEXT', data: requestData }, (res: any) => {
-            if (!res?.ok) {
-                console.error(res?.error);
-            }
-            setStreaming(false);
+        return () => {
             chrome.runtime.onMessage.removeListener(chunkListener);
-        });
+        };
+    }, []);
+
+    const handleSend = async (text: string, model?: ModelType, language?: string, textCount?: number) => {
+        setModalContent('');
+        setIsOpenModal(true);
+        setStreaming(true);
+
+        const defaultSetting = (await storage.get('setting')).setting as SettingState;
+
+        const requestData: SummaryRequestData = {
+            text,
+            model: model || (defaultSetting?.model as ModelType) || 'chatgpt',
+            textCount: textCount || Number(defaultSetting?.textCount) || 200,
+            language: language || defaultSetting?.language || 'vietnamese',
+        };
+
+        try {
+            chrome.runtime.sendMessage({ type: 'SEND_SELECTED_TEXT', data: requestData }, (res: any) => {
+                if (!res?.ok) console.error(res?.error);
+                setStreaming(false);
+            });
+        } catch (e) {
+            console.warn('Cannot send message:', e);
+            setStreaming(false);
+        }
     };
 
     const handleRefresh = async ({

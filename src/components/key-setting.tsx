@@ -5,8 +5,6 @@ import { storage } from '~/utils/storage';
 import type { BackgroundResponse, KeyInput, KeyValidateRequestData, Provider } from '~types';
 
 import ApiKeyForm from './api-key-form';
-import ApiKeyInput from './api-key-input';
-import Button from './button';
 
 function KeySetting() {
     const [keys, setKeys] = useState({

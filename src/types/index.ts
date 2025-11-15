@@ -20,11 +20,20 @@ export type KeyInput = {
 export type SummaryRequestData = {
     text: string;
     model: ModelType;
-    responseTextCount: number;
-    nativeLanguage: string;
+    textCount: number;
+    language: string;
 };
 
 export type KeyValidateRequestData = {
     provider: Provider;
     key: string;
+};
+
+export type SettingState = {
+    model: string;
+    language: string;
+    isLogoVisible: boolean;
+    isDoubleClick: boolean;
+    isShift: boolean;
+    textCount: number;
 };
