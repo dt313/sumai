@@ -14,6 +14,7 @@ export const validateProviderKey = async (provider: Provider, key: string): Prom
             return validationService.validateGeminiKey(key);
 
         case SSU_LABEL:
+            console.log('ssu', key);
             return validationService.validateSSUKey(key);
 
         default:

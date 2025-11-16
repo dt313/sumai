@@ -31,8 +31,9 @@ function KeySetting() {
             };
 
             // Đợi kết quả validate từ background
-            const res = await new Promise<BackgroundResponse>((resolve) => {
+            const res = await new Promise<BackgroundResponse>((resolve, reject) => {
                 chrome.runtime.sendMessage({ type: 'VALIDATE_KEY', data }, (response) => {
+                    if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                     resolve(response);
                 });
             });

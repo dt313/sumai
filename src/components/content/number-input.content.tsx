@@ -30,6 +30,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
                     step={step}
                     value={value}
                     onChange={(e) => onChange(parseInt(e.target.value))}
+                    onMouseDown={(e) => e.stopPropagation()}
                     {...props}
                     className={`ni-input ${className || ''}`}
                 />

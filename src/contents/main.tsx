@@ -3,6 +3,8 @@ import toolTips from 'data-text:./styles/tooltip.css';
 import type { PlasmoCSConfig } from 'plasmo';
 import React, { useEffect, useState } from 'react';
 
+import { useSendOnDoubleClick } from '~hooks/use-send-on-double-click';
+import { useSendOnShift } from '~hooks/use-send-on-shift';
 // import './styles/content.css';
 // import './styles/tooltip.css';
 
@@ -30,30 +32,6 @@ const ContentUI: React.FC = () => {
     const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
     const [streaming, setStreaming] = useState(false);
 
-    const handleMouseUp = () => {
-        const selection = window.getSelection()?.toString().trim();
-        if (!selection) return;
-        const rect = window.getSelection()?.getRangeAt(0).getBoundingClientRect();
-        if (!rect) return;
-
-        setSelectedText(selection);
-        setButtonPos({ x: rect.right + window.scrollX, y: rect.bottom + window.scrollY });
-    };
-
-    useEffect(() => {
-        const chunkListener = (msg: any) => {
-            if (msg.type === 'SUMMARY_CHUNK') {
-                setModalContent((prev) => prev + msg.chunk.replace(/([^\n])\n([^\n])/g, '$1\n\n$2'));
-            }
-        };
-
-        chrome.runtime.onMessage.addListener(chunkListener);
-
-        return () => {
-            chrome.runtime.onMessage.removeListener(chunkListener);
-        };
-    }, []);
-
     const handleSend = async (text: string, model?: ModelType, language?: string, textCount?: number) => {
         setModalContent('');
         setIsOpenModal(true);
@@ -79,6 +57,53 @@ const ContentUI: React.FC = () => {
         }
     };
 
+    const hideButton = () => {
+        setButtonPos(null);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedText(null);
+        setIsOpenModal(false);
+        setButtonPos(null);
+    };
+
+    useSendOnShift({
+        selectedText,
+        isOpenModal,
+        handleSend,
+        hideButton: hideButton,
+    });
+
+    useSendOnDoubleClick({
+        isOpenModal,
+        handleSend,
+        hideButton: hideButton,
+    });
+
+    const handleMouseUp = () => {
+        const selection = window.getSelection()?.toString().trim();
+        if (!selection) return;
+        const rect = window.getSelection()?.getRangeAt(0).getBoundingClientRect();
+        if (!rect) return;
+
+        setSelectedText(selection);
+        setButtonPos({ x: rect.right + window.scrollX, y: rect.bottom + window.scrollY });
+    };
+
+    useEffect(() => {
+        const chunkListener = (msg: any) => {
+            if (msg.type === 'SUMMARY_CHUNK') {
+                setModalContent((prev) => prev + msg.chunk.replace(/([^\n])\n([^\n])/g, '$1\n\n$2'));
+            }
+        };
+
+        chrome.runtime.onMessage.addListener(chunkListener);
+
+        return () => {
+            chrome.runtime.onMessage.removeListener(chunkListener);
+        };
+    }, []);
+
     const handleRefresh = async ({
         model,
         language,
@@ -98,25 +123,21 @@ const ContentUI: React.FC = () => {
         };
     }, []);
 
-    const handleClickOutside = () => {
-        setButtonPos(null);
-    };
-
     return (
         <>
-            {buttonPos && (
+            {buttonPos && !isOpenModal && (
                 <SelectionButton
                     text={selectedText}
                     x={buttonPos.x}
                     y={buttonPos.y}
                     onSend={handleSend}
-                    onOutsideClick={handleClickOutside}
+                    onOutsideClick={hideButton}
                 />
             )}
             {isOpenModal && (
                 <Modal
                     content={modalContent}
-                    onClose={() => setIsOpenModal(false)}
+                    onClose={handleCloseModal}
                     onRefresh={handleRefresh}
                     isStreaming={streaming}
                 />

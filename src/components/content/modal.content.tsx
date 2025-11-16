@@ -8,13 +8,14 @@ import remarkGfm from 'remark-gfm';
 
 import images from '~/assets/images';
 import Selection from '~components/content/selection.content';
-import SpinLoading from '~components/spin-loading';
 import { languageSelection, modelSelection } from '~configs/ui';
 import { TEXT_COUNT_MAX, TEXT_COUNT_MIN } from '~constants';
+import { useDraggable } from '~hooks/use-draggable';
 import type { ModelType } from '~types';
 import { storage } from '~utils/storage';
 
 import NumberInput from './number-input.content';
+import ResizableDiv from './resizeable-div';
 import Tooltip from './tool-tip';
 
 type ModalProps = {
@@ -32,6 +33,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
     });
     const [copied, setCopied] = useState(false);
     const copyTimeout = useRef<NodeJS.Timeout | null>(null);
+    const { isDragging, dragRef, handleMouseDown } = useDraggable();
 
     useEffect(() => {
         const loadSetting = async () => {
@@ -73,94 +75,112 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
         [isStreaming, copied],
     );
 
+    const preventMouseEvent = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    console.log({ isDragging });
+
     return (
         <>
             <div className="plasmo-overlay"></div>
 
-            <div className="plasmo-modal" onMouseUp={(e) => e.stopPropagation()}>
-                {/* Header */}
-                <div className="plasmo-modal-header">
-                    {/* <img src={images.logo} alt="Logo" className="plasmo-modal-logo" /> */}
-                    <div className="filter">
-                        <div className="filter-item">
-                            <Selection
-                                value={setting.model}
-                                onChange={(v) => updateSetting('model', v)}
-                                list={modelSelection}
-                            />
-                        </div>
+            <ResizableDiv className="plasmo-modal" divRef={dragRef}>
+                <div
+                    className={`modal-body ${isDragging && 'dragging'}`}
 
-                        <div className="filter-item">
-                            <Selection
-                                value={setting.language}
-                                onChange={(v) => updateSetting('language', v)}
-                                list={languageSelection}
-                            />
-                        </div>
+                    // onMouseUp={(e) => e.stopPropagation()}
+                >
+                    {/* Header */}
+                    <div className="plasmo-modal-header" onMouseDown={handleMouseDown}>
+                        {/* <img src={images.logo} alt="Logo" className="plasmo-modal-logo" /> */}
+                        <div className="filter">
+                            <div className="filter-item" onMouseDown={preventMouseEvent}>
+                                <Selection
+                                    value={setting.model}
+                                    onChange={(v) => updateSetting('model', v)}
+                                    list={modelSelection}
+                                />
+                            </div>
 
-                        <div className="filter-item">
-                            <NumberInput
-                                id="text-count"
-                                value={setting.textCount}
-                                onChange={(v) => clampTextCount(v)}
-                                min={TEXT_COUNT_MIN}
-                                max={TEXT_COUNT_MAX}
-                                step={50}
-                                className="plasmo-input"
-                            />
-                        </div>
-                        <Tooltip content="Summary">
-                            <button
-                                className="re-summary-btn"
-                                onClick={handleRefresh}
-                                data-tooltip-id="summary-tooltip"
-                                data-tooltip-content="Summary"
-                            >
-                                {/* <PencilLine className="pen-icon" size={18} /> */}
-                                <img className="re-summary-img" src={images.logo} />
-                            </button>
-                        </Tooltip>
-                    </div>
+                            <div className="filter-item" onMouseDown={preventMouseEvent}>
+                                <Selection
+                                    value={setting.language}
+                                    onChange={(v) => updateSetting('language', v)}
+                                    list={languageSelection}
+                                />
+                            </div>
 
-                    <div className="right-side">
-                        <Tooltip content={copied ? 'Copied' : 'Copy'}>
-                            <CopyToClipboard text={isStreaming || copied ? '' : content} onCopy={handleCopy}>
-                                <span
-                                    data-tooltip-id="copy-tooltip"
-                                    data-tooltip-content="Copy"
-                                    className={`icon-wrap ${isStreaming && 'disable'}`}
+                            <div className="filter-item" onMouseDown={preventMouseEvent}>
+                                <NumberInput
+                                    id="text-count"
+                                    value={setting.textCount}
+                                    onChange={(v) => clampTextCount(v)}
+                                    min={TEXT_COUNT_MIN}
+                                    max={TEXT_COUNT_MAX}
+                                    step={50}
+                                    className="plasmo-input"
+                                />
+                            </div>
+                            <Tooltip content="Summary">
+                                <button
+                                    className="re-summary-btn"
+                                    onClick={handleRefresh}
+                                    data-tooltip-id="summary-tooltip"
+                                    data-tooltip-content="Summary"
+                                    onMouseDown={preventMouseEvent}
                                 >
-                                    {!copied ? <Copy className="icon" strokeWidth={2.5} size={18} /> : '✅'}
-                                </span>
-                            </CopyToClipboard>
-                        </Tooltip>
+                                    {/* <PencilLine className="pen-icon" size={18} /> */}
+                                    <img className="re-summary-img" src={images.logo} />
+                                </button>
+                            </Tooltip>
+                        </div>
 
-                        <Tooltip content="Close">
-                            <span
-                                data-tooltip-id="close-tooltip"
-                                data-tooltip-content="Close"
-                                className="icon-wrap"
-                                onClick={onClose}
-                            >
-                                <X className="icon" strokeWidth={2.5} size={18} />
-                            </span>
-                        </Tooltip>
+                        <div className="right-side">
+                            <Tooltip content={copied ? 'Copied' : 'Copy'}>
+                                <CopyToClipboard text={isStreaming || copied ? '' : content} onCopy={handleCopy}>
+                                    <span
+                                        data-tooltip-id="copy-tooltip"
+                                        data-tooltip-content="Copy"
+                                        className={`icon-wrap ${isStreaming && 'disable'}`}
+                                        onMouseDown={preventMouseEvent}
+                                    >
+                                        {!copied ? <Copy className="icon" strokeWidth={2.5} size={18} /> : '✅'}
+                                    </span>
+                                </CopyToClipboard>
+                            </Tooltip>
+
+                            <Tooltip content="Close">
+                                <span
+                                    data-tooltip-id="close-tooltip"
+                                    data-tooltip-content="Close"
+                                    className="icon-wrap"
+                                    onClick={onClose}
+                                    onMouseDown={preventMouseEvent}
+                                >
+                                    <X className="icon" strokeWidth={2.5} size={18} />
+                                </span>
+                            </Tooltip>
+                        </div>
+                    </div>
+
+                    {/* Body content */}
+                    <div className="plasmo-modal-content">
+                        <div className="modal-content-wrap">
+                            {!content ? (
+                                <div className="modal-loading">
+                                    <img className="modal-loading-img" src={images.loading} />
+                                </div>
+                            ) : (
+                                <div className="markdown-body">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-
-                {/* Body content */}
-                <div className="plasmo-modal-content">
-                    {!content ? (
-                        <div className="modal-loading">
-                            <img className="modal-loading-img" src={images.loading} />
-                        </div>
-                    ) : (
-                        <div className="markdown-body">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-                        </div>
-                    )}
-                </div>
-            </div>
+            </ResizableDiv>
         </>
     );
 };
