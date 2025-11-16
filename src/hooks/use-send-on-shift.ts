@@ -13,7 +13,7 @@ export const useSendOnShift = ({
 }) => {
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Shift' && selectedText && !isOpenModal) {
+            if (e.key === 'Shift' && selectedText) {
                 handleSend(selectedText);
             }
         };

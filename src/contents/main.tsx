@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useSendOnDoubleClick } from '~hooks/use-send-on-double-click';
 import { useSendOnShift } from '~hooks/use-send-on-shift';
+import { useStorageSetting } from '~hooks/use-storage-setting';
 // import './styles/content.css';
 // import './styles/tooltip.css';
 
@@ -31,6 +32,7 @@ const ContentUI: React.FC = () => {
     const [modalContent, setModalContent] = useState<string | null>(null);
     const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
     const [streaming, setStreaming] = useState(false);
+    const setting = useStorageSetting();
 
     const handleSend = async (text: string, model?: ModelType, language?: string, textCount?: number) => {
         setModalContent('');
@@ -70,13 +72,13 @@ const ContentUI: React.FC = () => {
     useSendOnShift({
         selectedText,
         isOpenModal,
-        handleSend,
+        handleSend: setting?.isShift ? handleSend : () => {},
         hideButton: hideButton,
     });
 
     useSendOnDoubleClick({
         isOpenModal,
-        handleSend,
+        handleSend: setting?.isDoubleClick ? handleSend : () => {},
         hideButton: hideButton,
     });
 
@@ -125,7 +127,7 @@ const ContentUI: React.FC = () => {
 
     return (
         <>
-            {buttonPos && !isOpenModal && (
+            {buttonPos && setting?.isLogoVisible && (
                 <SelectionButton
                     text={selectedText}
                     x={buttonPos.x}

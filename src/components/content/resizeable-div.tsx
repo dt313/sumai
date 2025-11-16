@@ -14,7 +14,7 @@ const ResizableDiv: React.FC<Props> = ({
     children,
     minWidth = 300,
     minHeight = 200,
-    defaultWidth = 600,
+    defaultWidth = 700,
     defaultHeight = 300,
     className = '',
     divRef,
