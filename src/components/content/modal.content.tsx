@@ -8,11 +8,11 @@ import remarkGfm from 'remark-gfm';
 
 import images from '~/assets/images';
 import Selection from '~components/content/selection.content';
-import { languageSelection, modelSelection } from '~configs/ui';
+import { languageSelection, modelSelection, modeSelection } from '~configs/ui';
 import { TEXT_COUNT_MAX, TEXT_COUNT_MIN } from '~constants';
+import { useTemporarySetting } from '~context/setting-context';
 import { useDraggable } from '~hooks/use-draggable';
-import type { ModelType } from '~types';
-import { storage } from '~utils/storage';
+import type { ModelType, ModeType } from '~types';
 
 import NumberInput from './number-input.content';
 import ResizableDiv from './resizeable-div';
@@ -22,48 +22,43 @@ type ModalProps = {
     content: string;
     isStreaming: boolean;
     onClose: () => void;
-    onRefresh: ({ model, language, textCount }: { model: ModelType; language: string; textCount: number }) => void;
+    onRefresh: ({
+        model,
+        language,
+        textCount,
+        mode,
+    }: {
+        model: ModelType;
+        language: string;
+        textCount: number;
+        mode: ModeType;
+    }) => void;
 };
 
 const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh }) => {
-    const [setting, setSetting] = useState({
-        model: 'chatgpt' as ModelType,
-        language: 'vietnamese',
-        textCount: 200,
-    });
+    const { tempSetting, updateTempSetting } = useTemporarySetting();
     const [copied, setCopied] = useState(false);
     const copyTimeout = useRef<NodeJS.Timeout | null>(null);
     const { isDragging, dragRef, handleMouseDown } = useDraggable();
 
-    useEffect(() => {
-        const loadSetting = async () => {
-            const { setting: defaultSetting } = await storage.get('setting');
-            if (defaultSetting) {
-                setSetting((prev) => ({
-                    ...prev,
-                    model: defaultSetting.model || prev.model,
-                    language: defaultSetting.language || prev.language,
-                    textCount: defaultSetting.textCount || prev.textCount,
-                }));
-            }
-        };
-        loadSetting();
-    }, []);
-
     const handleRefresh = useCallback(() => {
-        onRefresh(setting);
-    }, [onRefresh, setting]);
+        onRefresh({
+            model: tempSetting.model as ModelType,
+            language: tempSetting.language,
+            textCount: tempSetting.textCount,
+            mode: tempSetting.mode as ModeType,
+        });
+    }, [onRefresh, tempSetting]);
 
-    const updateSetting = useCallback((key: keyof typeof setting, value: any) => {
-        setSetting((prev) => ({ ...prev, [key]: value }));
-    }, []);
+    const updateSetting = (key: keyof typeof tempSetting, value: any) => {
+        updateTempSetting({ [key]: value });
+    };
 
-    const clampTextCount = useCallback(
-        (value) => {
-            updateSetting('textCount', Math.max(TEXT_COUNT_MIN, Math.min(value, TEXT_COUNT_MAX)));
-        },
-        [updateSetting],
-    );
+    const clampTextCount = (value) => {
+        updateTempSetting({
+            textCount: Math.max(TEXT_COUNT_MIN, Math.min(value, TEXT_COUNT_MAX)),
+        });
+    };
 
     const handleCopy = useCallback(
         (_: string, result: boolean) => {
@@ -80,15 +75,13 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
         e.stopPropagation();
     };
 
-    console.log({ isDragging });
-
     return (
         <>
             <div className="plasmo-overlay"></div>
 
             <ResizableDiv className="plasmo-modal" divRef={dragRef}>
                 <div
-                    className={`modal-body ${isDragging && 'dragging'}`}
+                    className={`modal-body ${isDragging ? 'dragging' : ''}`}
 
                     // onMouseUp={(e) => e.stopPropagation()}
                 >
@@ -98,7 +91,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                         <div className="filter">
                             <div className="filter-item" onMouseDown={preventMouseEvent}>
                                 <Selection
-                                    value={setting.model}
+                                    value={tempSetting.model}
                                     onChange={(v) => updateSetting('model', v)}
                                     list={modelSelection}
                                 />
@@ -106,7 +99,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
 
                             <div className="filter-item" onMouseDown={preventMouseEvent}>
                                 <Selection
-                                    value={setting.language}
+                                    value={tempSetting.language}
                                     onChange={(v) => updateSetting('language', v)}
                                     list={languageSelection}
                                 />
@@ -115,7 +108,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                             <div className="filter-item" onMouseDown={preventMouseEvent}>
                                 <NumberInput
                                     id="text-count"
-                                    value={setting.textCount}
+                                    value={tempSetting.textCount}
                                     onChange={(v) => clampTextCount(v)}
                                     min={TEXT_COUNT_MIN}
                                     max={TEXT_COUNT_MAX}
@@ -123,7 +116,15 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                                     className="plasmo-input"
                                 />
                             </div>
-                            <Tooltip content="Summary">
+
+                            <div className="filter-item" onMouseDown={preventMouseEvent}>
+                                <Selection
+                                    value={tempSetting.mode}
+                                    onChange={(v) => updateSetting('mode', v)}
+                                    list={modeSelection}
+                                />
+                            </div>
+                            <Tooltip content="Ask">
                                 <button
                                     className="re-summary-btn"
                                     onClick={handleRefresh}
@@ -132,7 +133,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                                     onMouseDown={preventMouseEvent}
                                 >
                                     {/* <PencilLine className="pen-icon" size={18} /> */}
-                                    <img className="re-summary-img" src={images.logo} />
+                                    <img className="re-summary-img" src={images.bard} />
                                 </button>
                             </Tooltip>
                         </div>
@@ -173,9 +174,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                                     <img className="modal-loading-img" src={images.loading} />
                                 </div>
                             ) : (
-                                <div className="markdown-body">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-                                </div>
+                                <ReactMarkdown className="markdown-body">{content}</ReactMarkdown>
                             )}
                         </div>
                     </div>

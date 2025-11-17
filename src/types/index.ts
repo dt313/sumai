@@ -7,6 +7,7 @@ export type BackgroundResponse = {
 };
 
 export type ModelType = 'chatgpt' | 'claude' | 'gemini';
+export type ModeType = 'translate' | 'summary' | 'explain';
 export type Provider = ModelType | 'ssu';
 
 export type KeyInput = {
@@ -22,6 +23,7 @@ export type SummaryRequestData = {
     model: ModelType;
     textCount: number;
     language: string;
+    mode: ModeType;
 };
 
 export type KeyValidateRequestData = {
@@ -36,4 +38,6 @@ export type SettingState = {
     isDoubleClick: boolean;
     isShift: boolean;
     textCount: number;
+    mode: ModeType;
+    isDarkTheme: boolean;
 };

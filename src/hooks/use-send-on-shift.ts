@@ -8,13 +8,13 @@ export const useSendOnShift = ({
 }: {
     selectedText: string | null;
     isOpenModal: boolean;
-    handleSend: (text: string) => void;
+    handleSend: ({ text }: { text: string }) => void;
     hideButton: () => void;
 }) => {
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Shift' && selectedText) {
-                handleSend(selectedText);
+                handleSend({ text: selectedText });
             }
         };
 

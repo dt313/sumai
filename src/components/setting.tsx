@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { languageSelection, modelSelection } from '~configs/ui';
+import { languageSelection, modelSelection, modeSelection } from '~configs/ui';
 import { defaultSetting, TEXT_COUNT_MAX, TEXT_COUNT_MIN } from '~constants';
 import type { SettingState } from '~types';
 import { storage } from '~utils/storage';
@@ -10,14 +10,7 @@ import Selection from './selection';
 import SwitchButton from './switch-button';
 
 function Setting() {
-    const [setting, setSetting] = useState<SettingState>({
-        model: defaultSetting?.model || 'chatgpt',
-        language: defaultSetting?.language || 'vietnamese',
-        textCount: defaultSetting?.textCount || 200,
-        isDoubleClick: defaultSetting?.isDoubleClick || true,
-        isLogoVisible: defaultSetting?.isLogoVisible || true,
-        isShift: defaultSetting?.isShift || true,
-    });
+    const [setting, setSetting] = useState<SettingState>(defaultSetting);
 
     useEffect(() => {
         const loadSetting = async () => {
@@ -56,6 +49,7 @@ function Setting() {
                 value={setting.language}
                 onChange={(v) => update('language', v)}
             />
+            <Selection label="Mode" list={modeSelection} value={setting.mode} onChange={(v) => update('mode', v)} />
             <Selection label="Model" list={modelSelection} value={setting.model} onChange={(v) => update('model', v)} />
 
             {/* Summarize count */}
@@ -72,6 +66,7 @@ function Setting() {
                 { id: 'logoVisible', label: 'Logo Visible', key: 'isLogoVisible' },
                 { id: 'doubleClick', label: 'Double Click to Summarize', key: 'isDoubleClick' },
                 { id: 'shiftSummarize', label: 'Shift to Summarize', key: 'isShift' },
+                { id: 'darkTheme', label: 'Dark Theme', key: 'isDarkTheme' },
             ].map(({ id, label, key }) => (
                 <div key={id} className="flex items-center gap-2">
                     <label htmlFor={id} className="text-sm font-medium flex-1">

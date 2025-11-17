@@ -4,7 +4,11 @@ const claude = require('./claude.png');
 const ssu = require('./ssu.png');
 const logo = require('./logo.png');
 const loading = require('./loading.gif');
+const earth = require('./earth.gif');
+const bulb = require('./bulb.gif');
+const summary = require('./document.gif');
+const bard = require('./bard.png');
 
-const images = { openai, gemini, claude, ssu, logo, loading };
+const images = { openai, gemini, claude, ssu, logo, loading, earth, bulb, summary, bard };
 
 export default images;

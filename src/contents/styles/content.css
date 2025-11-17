@@ -1,48 +1,80 @@
-* {
-    --bg-color: #f0eaea;
+.light {
+    --wrap-color: #3dc8e066;
+    --bg-color: #fdfdf8;
+    --header-item-color: var(--bg-color);
     --text-color: #222;
     --accent: #06b6d4;
     --border-color: #80808044;
+    --option-hover: #e5e5e5;
+    --tool-tip-bg: var(--bg-color);
     --font-family: ui-sans-serif, system-ui, -apple-system, 'system-ui', 'Segoe UI', Roboto, 'Noto Sans', Ubuntu,
         Cantarell, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
-
-    font-family: var(--font-family);
-    box-sizing: border-box;
     --filter-btn-height: 32px;
 }
 
+.dark {
+    --wrap-color: #0b2e3488;
+    --bg-color: #03171a;
+
+    --header-item-color: #03171a;
+    --text-color: #fff;
+    --accent: #06b6d4;
+    --border-color: #80808044;
+    --option-hover: #2d2d2d90;
+    --tool-tip-bg: #000;
+
+    --font-family: ui-sans-serif, system-ui, -apple-system, 'system-ui', 'Segoe UI', Roboto, 'Noto Sans', Ubuntu,
+        Cantarell, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+    --filter-btn-height: 32px;
+}
+
+* {
+    font-family: var(--font-family);
+    box-sizing: border-box;
+}
+
+.selection-btn-wrap {
+    display: flex;
+    background-color: #fff;
+    border: 0.5px solid var(--accent);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+}
+
 .selection-btn {
-    background-color: var(--bg-color);
-    color: white;
-    border-radius: 10px;
     border: none;
     font-size: 14px;
+    background-color: transparent;
     cursor: pointer;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
     transition: all 0.25s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     user-select: none;
-    height: 40px;
-    width: 40px;
+    height: 28x;
+    width: 28px;
+    padding: 4px;
     transition: all 0.3 cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.selection-btn:nth-child(2) {
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
 }
 
 .selection-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .selection-btn:active {
     transform: scale(0.97);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .btn-logo {
-    width: 24px;
-    height: 24px;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
 }
 
@@ -80,8 +112,8 @@
     height: 100%;
     width: 100%;
     padding: 4px;
-    background-color: #3dc8e066;
-    border: 1.5px solid #989898;
+    background-color: var(--wrap-color);
+    border: 1.5px solid #10b98133;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 
     backdrop-filter: blur(12px);
@@ -93,7 +125,7 @@
 }
 
 .dragging.modal-body {
-    background-color: transparent;
+    background-color: #33333333;
 }
 
 /* Header */
@@ -182,7 +214,7 @@
     width: 100%;
     height: 100%;
     padding: 0 12px;
-    background-color: var(--bg-color);
+    background-color: var(--header-item-color);
     border: 1.5px solid var(--border-color);
     border-radius: 8px;
     cursor: pointer;
@@ -223,7 +255,7 @@
     position: absolute;
     width: 130%;
     margin-top: 4px;
-    background: var(--bg-color);
+    background-color: var(--header-item-color);
     border: 1.5px solid var(--border-color);
     border-radius: 8px;
     max-height: 120px;
@@ -246,7 +278,7 @@
 }
 
 .selection-option:hover {
-    background: #e5e5e5;
+    background: var(--option-hover);
 }
 
 .selection-option img {
@@ -338,7 +370,7 @@
     width: 100%;
     padding: 8px 32px 8px 12px;
     font-size: 12px;
-    background-color: var(--bg-color);
+    background-color: var(--header-item-color);
     color: var(--text-color);
     border: 1.5px solid var(--border-color);
     border-radius: 8px;
@@ -403,7 +435,7 @@
 }
 
 .icon-wrap {
-    background-color: var(--bg-color);
+    background-color: var(--header-item-color);
     outline: none;
     border: 1.5px solid var(--border-color);
     color: var(--text-color);

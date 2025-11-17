@@ -27,4 +27,6 @@ export const defaultSetting: SettingState = {
     isDoubleClick: true,
     isShift: true,
     textCount: 200,
+    isDarkTheme: false,
+    mode: 'summary',
 };

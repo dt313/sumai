@@ -47,7 +47,7 @@ const ResizableDiv: React.FC<Props> = ({
         });
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e) => {
         isResizing.current = false;
     };
 
@@ -64,6 +64,7 @@ const ResizableDiv: React.FC<Props> = ({
     return (
         <div
             ref={ref}
+            id="plasmo-modal"
             className={className}
             style={{
                 position: 'fixed',

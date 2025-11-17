@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 
+import { defaultSetting } from '~constants';
+import type { SettingState } from '~types';
 import { storage } from '~utils/storage';
 
 export const useStorageSetting = () => {
-    const [setting, setSetting] = useState<{ isShift?: boolean; [key: string]: any }>({});
+    const [setting, setSetting] = useState<SettingState>(defaultSetting);
 
     useEffect(() => {
         // 1. Hàm lắng nghe khi storage thay đổi

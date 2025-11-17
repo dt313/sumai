@@ -1,5 +1,5 @@
 import { SSU_API_URL, SSU_MODEL_ENDPOINTS } from '~constants';
-import type { ModelType } from '~types';
+import type { ModelType, ModeType } from '~types';
 import {
     buildClaudeBody,
     buildClaudeHeaders,
@@ -33,21 +33,33 @@ export const MODEL_BODY_BUILDERS: Record<ModelType, (params: BodyBuilderParams) 
     gemini: ({ systemPrompt, userPrompt, model, stream }) => buildGeminiBody({ systemPrompt, userPrompt }),
 };
 
-const generateSummaryPrompt = (
+const generatePrompt = (
     language: string,
     textCount: number,
-    summaryText: string,
+    text: string,
+    mode: ModeType,
 ): { systemPrompt: string; userPrompt: string } => {
-    const systemPrompt =
-        `You are a helpful assistant. Only summarize the text. Do NOT add any explanations, opinions, or extra words. Focus solely on the key points.`.trim();
+    let systemPrompt = '';
+    let userPrompt = '';
 
-    const userPrompt =
-        `Summarize the following text in ${language}, using no more than ${textCount} words. Do NOT add anything extra, only the key points:\n\n${summaryText}`.trim();
+    switch (mode) {
+        case 'summary':
+            systemPrompt = `You are a helpful assistant. Only summarize the text. Do NOT add explanations, opinions, or extra content. Focus strictly on key points.`;
+            userPrompt = `Summarize the following text in ${language} using no more than ${textCount} words. Only include key points:\n\n${text}`;
+            break;
 
-    return {
-        systemPrompt,
-        userPrompt,
-    };
+        case 'translate':
+            systemPrompt = `You are a helpful assistant. Your task is to translate the text accurately without adding or removing meaning. No explanations.`;
+            userPrompt = `Translate the following text into ${language}:\n\n${text}`;
+            break;
+
+        case 'explain':
+            systemPrompt = `You are a helpful assistant. Explain the text in a simple and clear way suitable for beginners. Do NOT add unrelated information.`;
+            userPrompt = `Explain the following text in ${language}, using no more than ${textCount} words:\n\n${text}`;
+            break;
+    }
+
+    return { systemPrompt, userPrompt };
 };
 
 const handleStreamingResponse = async (
@@ -122,9 +134,10 @@ export const summarize = async (
     text: string,
     language: string = 'English',
     textCount: number = 50,
+    mode: ModeType = 'summary',
     onChunk?: (chunk: string) => void,
 ) => {
-    const { systemPrompt, userPrompt } = generateSummaryPrompt(language, textCount, text);
+    const { systemPrompt, userPrompt } = generatePrompt(language, textCount, text, mode);
 
     const url = SSU_MODEL_ENDPOINTS[model];
 
@@ -145,67 +158,3 @@ export const summarize = async (
 
     return handleStreamingResponse(response, model, onChunk);
 };
-
-// export const summarize = async (
-//     key: string,
-//     model: ModelType = 'chatgpt',
-//     text: string,
-//     language: string = 'English',
-//     textCount: number = 50,
-//     onChunk?: (chunk: string) => void,
-// ): Promise<string> => {
-//     try {
-//         const response = await fetch(SSU_API_URL, {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 Authorization: `Bearer ${key}`,
-//             },
-//             body: JSON.stringify({
-//                 model: 'gpt-5-chat-latest',
-//                 messages: [
-//                     { role: 'system', content: systemPrompt },
-//                     { role: 'user', content: userPrompt },
-//                 ],
-//                 stream: true,
-//             }),
-//         });
-
-//         if (!response.body) throw new Error('No response body for streaming');
-
-//         const reader = response.body.getReader();
-//         const decoder = new TextDecoder('utf-8');
-//         let done = false;
-//         let summary = '';
-
-//         while (!done) {
-//             const { value, done: readerDone } = await reader.read();
-//             done = readerDone;
-//             if (value) {
-//                 const chunkText = decoder.decode(value, { stream: true });
-//                 // Mỗi chunk có thể là nhiều dòng, parse từng line nếu cần
-//                 chunkText.split('\n').forEach((line) => {
-//                     line = line.trim();
-//                     if (!line || !line.startsWith('data:')) return;
-//                     const jsonStr = line.replace(/^data: /, '');
-//                     if (jsonStr === '[DONE]') return;
-//                     try {
-//                         const parsed = JSON.parse(jsonStr);
-//                         const content = parsed.choices?.[0]?.delta?.content;
-//                         if (content) {
-//                             summary += content;
-//                             if (onChunk) onChunk(content); // gửi chunk ra callback
-//                         }
-//                     } catch (err) {
-//                         console.warn('Error parsing chunk:', err);
-//                     }
-//                 });
-//             }
-//         }
-
-//         return summary;
-//     } catch (error) {
-//         console.error('Error summarizing:', error);
-//         throw error;
-//     }
-// };

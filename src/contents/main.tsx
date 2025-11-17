@@ -3,14 +3,14 @@ import toolTips from 'data-text:./styles/tooltip.css';
 import type { PlasmoCSConfig } from 'plasmo';
 import React, { useEffect, useState } from 'react';
 
+import { TemporarySettingProvider, useTemporarySetting } from '~context/setting-context';
 import { useSendOnDoubleClick } from '~hooks/use-send-on-double-click';
 import { useSendOnShift } from '~hooks/use-send-on-shift';
 import { useStorageSetting } from '~hooks/use-storage-setting';
 // import './styles/content.css';
 // import './styles/tooltip.css';
 
-import type { ModelType, SettingState, SummaryRequestData } from '~types';
-import { storage } from '~utils/storage';
+import type { ModelType, ModeType, SettingState, SummaryRequestData } from '~types';
 
 import Modal from '../components/content/modal.content';
 import SelectionButton from '../components/content/selection-button.content';
@@ -26,26 +26,38 @@ export const getStyle = () => {
     return style;
 };
 
-const ContentUI: React.FC = () => {
+export type SendParams = {
+    text: string;
+    model?: ModelType;
+    language?: string;
+    textCount?: number;
+    mode?: ModeType;
+};
+
+const ContentUIInner: React.FC = () => {
     const [selectedText, setSelectedText] = useState<string | null>(null);
+    const [currentText, setCurrentText] = useState<string | null>(null);
     const [buttonPos, setButtonPos] = useState<{ x: number; y: number } | null>(null);
     const [modalContent, setModalContent] = useState<string | null>(null);
     const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
     const [streaming, setStreaming] = useState(false);
-    const setting = useStorageSetting();
+    const { tempSetting, resetTempSetting } = useTemporarySetting();
 
-    const handleSend = async (text: string, model?: ModelType, language?: string, textCount?: number) => {
+    const handleSend = async ({ text, model, language, textCount, mode }: SendParams) => {
         setModalContent('');
         setIsOpenModal(true);
         setStreaming(true);
+        setButtonPos(null);
+        setSelectedText(text);
 
-        const defaultSetting = (await storage.get('setting')).setting as SettingState;
+        const defaultSetting = tempSetting as SettingState;
 
         const requestData: SummaryRequestData = {
             text,
             model: model || (defaultSetting?.model as ModelType) || 'chatgpt',
             textCount: textCount || Number(defaultSetting?.textCount) || 200,
             language: language || defaultSetting?.language || 'vietnamese',
+            mode: mode || defaultSetting?.mode || 'summary',
         };
 
         try {
@@ -61,35 +73,56 @@ const ContentUI: React.FC = () => {
 
     const hideButton = () => {
         setButtonPos(null);
+        setCurrentText(null);
     };
 
     const handleCloseModal = () => {
         setSelectedText(null);
         setIsOpenModal(false);
         setButtonPos(null);
+        resetTempSetting();
     };
 
     useSendOnShift({
         selectedText,
         isOpenModal,
-        handleSend: setting?.isShift ? handleSend : () => {},
+        handleSend: tempSetting?.isShift ? handleSend : () => {},
         hideButton: hideButton,
     });
 
     useSendOnDoubleClick({
         isOpenModal,
-        handleSend: setting?.isDoubleClick ? handleSend : () => {},
+        handleSend: tempSetting?.isDoubleClick ? handleSend : () => {},
         hideButton: hideButton,
     });
 
-    const handleMouseUp = () => {
-        const selection = window.getSelection()?.toString().trim();
-        if (!selection) return;
-        const rect = window.getSelection()?.getRangeAt(0).getBoundingClientRect();
+    const handleMouseUp = (e: MouseEvent) => {
+        const path = e.composedPath?.(); // path gồm cả shadow DOM
+        const isInsideModal = path?.some(
+            (el) => el instanceof HTMLElement && (el.classList.contains('plasmo-modal') || el.id === 'plasmo-modal'),
+        );
+
+        if (isInsideModal) {
+            // selection trong modal → bỏ qua
+            return;
+        }
+
+        const sel = window.getSelection();
+        const text = sel?.toString().trim();
+        if (!text) return;
+
+        const anchorNode = sel.anchorNode;
+        if (!anchorNode) return;
+
+        // Lấy vị trí selection
+        const rect = sel.getRangeAt(0).getBoundingClientRect();
         if (!rect) return;
 
-        setSelectedText(selection);
-        setButtonPos({ x: rect.right + window.scrollX, y: rect.bottom + window.scrollY });
+        setCurrentText(text);
+        setButtonPos({
+            x: rect.right + window.scrollX,
+            y: rect.bottom + window.scrollY,
+        });
     };
 
     useEffect(() => {
@@ -110,12 +143,14 @@ const ContentUI: React.FC = () => {
         model,
         language,
         textCount,
+        mode,
     }: {
         model: ModelType;
         language: string;
         textCount: number;
+        mode: ModeType;
     }) => {
-        handleSend(selectedText, model, language, textCount);
+        handleSend({ text: selectedText, model, language, textCount, mode });
     };
 
     useEffect(() => {
@@ -126,16 +161,24 @@ const ContentUI: React.FC = () => {
     }, []);
 
     return (
-        <>
-            {buttonPos && setting?.isLogoVisible && (
+        <div className={`${tempSetting.isDarkTheme ? 'dark' : 'light'} `}>
+            {buttonPos && tempSetting?.isLogoVisible && (
                 <SelectionButton
-                    text={selectedText}
+                    text={currentText}
                     x={buttonPos.x}
                     y={buttonPos.y}
                     onSend={handleSend}
                     onOutsideClick={hideButton}
                 />
             )}
+
+            {/* <SelectionButton
+                text={selectedText}
+                x={buttonPos.x}
+                y={buttonPos.y}
+                onSend={handleSend}
+                onOutsideClick={hideButton}
+            /> */}
             {isOpenModal && (
                 <Modal
                     content={modalContent}
@@ -151,7 +194,15 @@ const ContentUI: React.FC = () => {
                 onRefresh={handleRefresh}
                 isStreaming={streaming}
             /> */}
-        </>
+        </div>
+    );
+};
+
+const ContentUI: React.FC = () => {
+    return (
+        <TemporarySettingProvider>
+            <ContentUIInner />
+        </TemporarySettingProvider>
     );
 };
 

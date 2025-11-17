@@ -6,7 +6,7 @@ export const useSendOnDoubleClick = ({
     hideButton,
 }: {
     isOpenModal: boolean;
-    handleSend: (text: string) => void;
+    handleSend: ({ text }: { text: string }) => void;
     hideButton: () => void;
 }) => {
     useEffect(() => {
@@ -14,7 +14,7 @@ export const useSendOnDoubleClick = ({
             const selection = window.getSelection()?.toString().trim();
             if (!selection) return;
 
-            handleSend(selection);
+            handleSend({ text: selection });
             hideButton();
         };
 

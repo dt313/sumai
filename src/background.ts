@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             const ssuKey = apiKeys?.ssu || null;
             let summary = '';
 
-            summarize(ssuKey, data.model, data.text, data.language, data.textCount, (chunk) => {
+            summarize(ssuKey, data.model, data.text, data.language, data.textCount, data.mode, (chunk) => {
                 chrome.tabs.sendMessage(sender.tab!.id!, { type: 'SUMMARY_CHUNK', chunk });
                 summary += chunk;
             })

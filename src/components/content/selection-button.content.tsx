@@ -1,23 +1,28 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import images from '~assets/images';
+import type { SendParams } from '~contents/main';
+import { useTemporarySetting } from '~context/setting-context';
+import type { ModelType, ModeType } from '~types';
+
+import Tooltip from './tool-tip';
 
 type ButtonProps = {
     text: string;
     x: number;
     y: number;
-    onSend: (text: string) => void;
+    onSend: ({ text, mode, model, textCount, language }: SendParams) => void;
     onOutsideClick: () => void; // callback khi click ngoài
 };
 
 const SelectionButton: React.FC<ButtonProps> = ({ text, x, y, onSend, onOutsideClick }) => {
-    const btnRef = useRef<HTMLButtonElement>(null);
-
+    const wrapRef = useRef<HTMLDivElement>(null);
+    const { tempSetting, updateTempSetting } = useTemporarySetting();
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             const path = e.composedPath();
 
-            if (!path.includes(btnRef.current)) {
+            if (!path.includes(wrapRef.current)) {
                 onOutsideClick();
             }
         };
@@ -28,10 +33,26 @@ const SelectionButton: React.FC<ButtonProps> = ({ text, x, y, onSend, onOutsideC
         };
     }, [onOutsideClick]);
 
+    const handleSend = useCallback(
+        (e, mode: ModeType) => {
+            e.stopPropagation();
+            updateTempSetting({ mode });
+
+            onSend({
+                text,
+                mode,
+                model: tempSetting.model as ModelType,
+                textCount: tempSetting.textCount,
+                language: tempSetting.language,
+            });
+        },
+        [onSend, tempSetting.model, tempSetting.textCount, tempSetting.language, updateTempSetting],
+    );
+
     return (
-        <button
-            ref={btnRef}
-            className="selection-btn"
+        <div
+            className="selection-btn-wrap"
+            ref={wrapRef}
             style={{
                 position: 'absolute',
                 top: y + 8,
@@ -39,13 +60,23 @@ const SelectionButton: React.FC<ButtonProps> = ({ text, x, y, onSend, onOutsideC
                 zIndex: 999999,
                 display: 'flex',
             }}
-            onClick={(e) => {
-                e.stopPropagation();
-                onSend(text);
-            }}
         >
-            <img src={images.logo} className="btn-logo" />
-        </button>
+            <Tooltip content="Translate">
+                <button className="selection-btn" onClick={(e) => handleSend(e, 'translate')}>
+                    <img src={images.earth} className="btn-logo" />
+                </button>
+            </Tooltip>
+            <Tooltip content="Summary">
+                <button className="selection-btn" onClick={(e) => handleSend(e, 'summary')}>
+                    <img src={images.summary} className="btn-logo" />
+                </button>
+            </Tooltip>
+            <Tooltip content="Explain">
+                <button className="selection-btn" onClick={(e) => handleSend(e, 'explain')}>
+                    <img src={images.bulb} className="btn-logo" />
+                </button>
+            </Tooltip>
+        </div>
     );
 };
 

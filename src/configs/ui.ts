@@ -47,6 +47,24 @@ export const modelSelection = [
     },
 ];
 
+export const modeSelection = [
+    {
+        label: 'Summary',
+        value: 'summary',
+        image: images.summary,
+    },
+    {
+        label: 'Explain',
+        value: 'explain',
+        image: images.bulb,
+    },
+    {
+        label: 'Translate',
+        value: 'translate',
+        image: images.earth,
+    },
+];
+
 export const languageSelection = [
     { value: 'english', label: 'English' },
     { value: 'vietnamese', label: 'Vietnamese' },
