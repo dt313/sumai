@@ -1,4 +1,5 @@
 import contentStyle from 'data-text:./styles/content.css';
+import markdownStyle from 'data-text:./styles/markdown.css';
 import toolTips from 'data-text:./styles/tooltip.css';
 import type { PlasmoCSConfig } from 'plasmo';
 import React, { useEffect, useState } from 'react';
@@ -6,14 +7,12 @@ import React, { useEffect, useState } from 'react';
 import { TemporarySettingProvider, useTemporarySetting } from '~context/setting-context';
 import { useSendOnDoubleClick } from '~hooks/use-send-on-double-click';
 import { useSendOnShift } from '~hooks/use-send-on-shift';
-import { useStorageSetting } from '~hooks/use-storage-setting';
-// import './styles/content.css';
-// import './styles/tooltip.css';
-
 import type { ModelType, ModeType, SettingState, SummaryRequestData } from '~types';
 
 import Modal from '../components/content/modal.content';
 import SelectionButton from '../components/content/selection-button.content';
+
+import 'highlight.js/styles/github-dark.css';
 
 export const config: PlasmoCSConfig = {
     matches: ['<all_urls>'],
@@ -22,7 +21,7 @@ export const config: PlasmoCSConfig = {
 
 export const getStyle = () => {
     const style = document.createElement('style');
-    style.textContent = contentStyle + toolTips;
+    style.textContent = contentStyle + toolTips + markdownStyle;
     return style;
 };
 

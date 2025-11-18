@@ -4,7 +4,6 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import remarkGfm from 'remark-gfm';
 
 import images from '~/assets/images';
 import Selection from '~components/content/selection.content';
@@ -16,6 +15,7 @@ import type { ModelType, ModeType } from '~types';
 
 import NumberInput from './number-input.content';
 import ResizableDiv from './resizeable-div';
+import SafeMarkdown from './safe-markdown';
 import Tooltip from './tool-tip';
 
 type ModalProps = {
@@ -40,6 +40,8 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
     const [copied, setCopied] = useState(false);
     const copyTimeout = useRef<NodeJS.Timeout | null>(null);
     const { isDragging, dragRef, handleMouseDown } = useDraggable();
+
+    console.log({ modal: content });
 
     const handleRefresh = useCallback(() => {
         onRefresh({
@@ -174,7 +176,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                                     <img className="modal-loading-img" src={images.loading} />
                                 </div>
                             ) : (
-                                <ReactMarkdown className="markdown-body">{content}</ReactMarkdown>
+                                <SafeMarkdown content={content} />
                             )}
                         </div>
                     </div>
