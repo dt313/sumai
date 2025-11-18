@@ -10,6 +10,7 @@ import { useSendOnDoubleClick } from '~hooks/use-send-on-double-click';
 import { useSendOnShift } from '~hooks/use-send-on-shift';
 import type { ModelType, ModeType, SettingState, SummaryRequestData } from '~types';
 import getErrorMessage from '~utils/get-error-msg';
+import smartPosition from '~utils/smart-position';
 
 import Modal from '../components/content/modal.content';
 import SelectionButton from '../components/content/selection-button.content';
@@ -125,11 +126,10 @@ const ContentUIInner: React.FC = () => {
         const rect = sel.getRangeAt(0).getBoundingClientRect();
         if (!rect) return;
 
+        const pos = smartPosition(rect);
+
         setCurrentText(text);
-        setButtonPos({
-            x: rect.right + window.scrollX,
-            y: rect.bottom + window.scrollY,
-        });
+        setButtonPos(pos);
     };
 
     useEffect(() => {
