@@ -1,9 +1,6 @@
 import { Copy, X } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import images from '~/assets/images';
 import Selection from '~components/content/selection.content';
@@ -40,8 +37,6 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
     const [copied, setCopied] = useState(false);
     const copyTimeout = useRef<NodeJS.Timeout | null>(null);
     const { isDragging, dragRef, handleMouseDown } = useDraggable();
-
-    console.log({ modal: content });
 
     const handleRefresh = useCallback(() => {
         onRefresh({

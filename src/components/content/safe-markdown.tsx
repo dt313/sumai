@@ -5,6 +5,7 @@ import hljs from 'highlight.js';
 import { marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import React, { useMemo } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import { useStorageSetting } from '~hooks/use-storage-setting';
 
@@ -19,9 +20,18 @@ marked.use(
     }),
 );
 
+// Fallback UI when error
+function MarkdownErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
+    return (
+        <div role="alert" style={{ color: 'red' }}>
+            <p>Something went wrong while rendering markdown:</p>
+            <pre>{error.message}</pre>
+        </div>
+    );
+}
+
 function SafeMarkdown({ content }: { content: string }) {
     const setting = useStorageSetting();
-    console.log({ content });
     const html = useMemo(() => {
         if (!content) return '';
 
@@ -44,4 +54,12 @@ function SafeMarkdown({ content }: { content: string }) {
     );
 }
 
-export default SafeMarkdown;
+// Bọc SafeMarkdown bằng ErrorBoundary khi export
+function SafeMarkdownWrapper(props: { content: string }) {
+    return (
+        <ErrorBoundary FallbackComponent={MarkdownErrorFallback}>
+            <SafeMarkdown {...props} />
+        </ErrorBoundary>
+    );
+}
+export default SafeMarkdownWrapper;

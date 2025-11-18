@@ -14,6 +14,8 @@ import SelectionButton from '../components/content/selection-button.content';
 
 import 'highlight.js/styles/github-dark.css';
 
+import { GlobalErrorBoundary } from '~components/global-error-boundary';
+
 export const config: PlasmoCSConfig = {
     matches: ['<all_urls>'],
     run_at: 'document_idle',
@@ -199,9 +201,11 @@ const ContentUIInner: React.FC = () => {
 
 const ContentUI: React.FC = () => {
     return (
-        <TemporarySettingProvider>
-            <ContentUIInner />
-        </TemporarySettingProvider>
+        <GlobalErrorBoundary>
+            <TemporarySettingProvider>
+                <ContentUIInner />
+            </TemporarySettingProvider>
+        </GlobalErrorBoundary>
     );
 };
 
