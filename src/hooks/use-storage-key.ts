@@ -1,20 +1,8 @@
 import { useEffect, useState } from 'react';
 
+import { defaultApiKeys } from '~constants';
+import type { ApiKeys } from '~types';
 import { storage } from '~utils/storage';
-
-export type ApiKeys = {
-    ssu: string;
-    chatgpt: string;
-    claude: string;
-    gemini: string;
-};
-
-const defaultApiKeys: ApiKeys = {
-    ssu: '',
-    chatgpt: '',
-    claude: '',
-    gemini: '',
-};
 
 export const useStorageApiKeys = () => {
     const [apiKeys, setApiKeys] = useState<ApiKeys>(defaultApiKeys);

@@ -1,4 +1,3 @@
-import { error } from 'console';
 import contentStyle from 'data-text:./styles/content.css';
 import markdownStyle from 'data-text:./styles/markdown.css';
 import toolTips from 'data-text:./styles/tooltip.css';
@@ -162,8 +161,6 @@ const ContentUIInner: React.FC = () => {
             document.removeEventListener('mouseup', handleMouseUp);
         };
     }, []);
-
-    console.log({ modalContent });
 
     return (
         <div className={`${tempSetting.isDarkTheme ? 'dark' : 'light'} `}>

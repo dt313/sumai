@@ -4,6 +4,7 @@ import images from '~assets/images';
 import type { SendParams } from '~contents/main';
 import { useTemporarySetting } from '~context/setting-context';
 import type { ModelType, ModeType } from '~types';
+import { hasAtLeastOneKey } from '~utils/check-key';
 
 import Tooltip from './tool-tip';
 
@@ -34,7 +35,13 @@ const SelectionButton: React.FC<ButtonProps> = ({ text, x, y, onSend, onOutsideC
     }, [onOutsideClick]);
 
     const handleSend = useCallback(
-        (e, mode: ModeType) => {
+        async (e, mode: ModeType) => {
+            const hasKey = await hasAtLeastOneKey();
+            if (!hasKey) {
+                chrome.runtime.sendMessage({ type: 'OPEN_OPTIONS_PAGE' });
+                return;
+            }
+
             e.stopPropagation();
             updateTempSetting({ mode });
 

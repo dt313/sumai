@@ -41,3 +41,10 @@ export type SettingState = {
     mode: ModeType;
     isDarkTheme: boolean;
 };
+
+export type ApiKeys = {
+    ssu: string;
+    chatgpt: string;
+    claude: string;
+    gemini: string;
+};

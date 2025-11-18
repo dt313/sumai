@@ -1,4 +1,4 @@
-import type { ModelType, SettingState } from '~types';
+import type { ApiKeys, ModelType, SettingState } from '~types';
 
 export const SSU_MODEL_ENDPOINTS: Record<ModelType, string> = {
     chatgpt: 'https://factchat-cloud.mindlogic.ai/v1/api/openai/chat/completions',
@@ -24,9 +24,16 @@ export const defaultSetting: SettingState = {
     model: 'chatgpt',
     language: 'vietnamese',
     isLogoVisible: true,
-    isDoubleClick: true,
+    isDoubleClick: false,
     isShift: true,
     textCount: 200,
     isDarkTheme: false,
     mode: 'summary',
+};
+
+export const defaultApiKeys: ApiKeys = {
+    ssu: '',
+    chatgpt: '',
+    claude: '',
+    gemini: '',
 };

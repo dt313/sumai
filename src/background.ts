@@ -1,4 +1,4 @@
-import { defaultSetting } from '~constants';
+import { defaultApiKeys, defaultSetting } from '~constants';
 import { ask } from '~services/ask';
 import type { KeyValidateRequestData, SummaryRequestData } from '~types';
 import getErrorMessage from '~utils/get-error-msg';
@@ -11,6 +11,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     console.log('✅ Extension installed or reloaded');
 
     const { setting } = await storage.get('setting');
+    const { apiKeys } = await storage.get('apiKeys');
 
     if (!setting) {
         await storage.set({
@@ -18,6 +19,12 @@ chrome.runtime.onInstalled.addListener(async () => {
         });
 
         console.log('✨ Default setting created!');
+    }
+
+    if (!apiKeys) {
+        await storage.set({
+            apiKeys: defaultApiKeys,
+        });
     }
 });
 
@@ -56,5 +63,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             .catch((err) => sendResponse({ ok: false, error: { message: getErrorMessage(err, 'Validation Error') } }));
 
         return true;
+    }
+
+    if (msg.type === 'OPEN_OPTIONS_PAGE') {
+        chrome.runtime.openOptionsPage?.();
     }
 });
