@@ -7,6 +7,26 @@ import getErrorMessage from '~utils/get-error-msg';
 import { storage } from '~utils/storage';
 import { validateProviderKey } from '~utils/validate-provider-key';
 
+let menuCreated = false;
+
+const createContextMenu = () => {
+    if (!menuCreated) {
+        chrome.contextMenus.create({
+            id: 'sum-ai',
+            title: 'Sumai',
+            contexts: ['selection'],
+        });
+        menuCreated = true;
+    }
+};
+
+const removeContextMenu = () => {
+    if (menuCreated) {
+        chrome.contextMenus.remove('my-custom-menu');
+        menuCreated = false;
+    }
+};
+
 chrome.runtime.onInstalled.addListener(async () => {
     console.log('✅ Extension installed or reloaded');
 
@@ -67,5 +87,26 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     if (msg.type === 'OPEN_OPTIONS_PAGE') {
         chrome.runtime.openOptionsPage?.();
+        return true;
+    }
+
+    if (msg.type === 'TEXT_SELECTED') {
+        console.log({ text: msg?.text });
+        if (msg?.text) {
+            createContextMenu();
+        } else {
+            removeContextMenu();
+        }
+        return true;
+    }
+});
+
+// Handle click context menu
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'sum-ai' && tab?.id) {
+        chrome.tabs.sendMessage(tab.id, {
+            type: 'CLICK_SUMAI_CONTEXT',
+            text: info.selectionText || null,
+        });
     }
 });

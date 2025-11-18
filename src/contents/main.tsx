@@ -43,6 +43,7 @@ const ContentUIInner: React.FC = () => {
     const { tempSetting, resetTempSetting } = useTemporarySetting();
 
     const handleSend = async ({ text, model, language, textCount, mode }: SendParams) => {
+        if (!text) return;
         setModalContent('');
         setIsOpenModal(true);
         setStreaming(true);
@@ -61,7 +62,9 @@ const ContentUIInner: React.FC = () => {
 
         try {
             chrome.runtime.sendMessage({ type: 'ASK_TEXT', data: requestData }, (res: any) => {
-                if (!res?.ok) console.error(res?.error);
+                if (!res?.ok) {
+                    console.error(res?.error);
+                }
                 setStreaming(false);
             });
         } catch (e) {
@@ -95,24 +98,30 @@ const ContentUIInner: React.FC = () => {
     });
 
     const handleMouseUp = (e: MouseEvent) => {
-        const path = e.composedPath?.(); // path gồm cả shadow DOM
+        const sel = window.getSelection();
+        const text = sel?.toString().trim();
+
+        const path = e.composedPath?.();
         const isInsideModal = path?.some(
             (el) => el instanceof HTMLElement && (el.classList.contains('plasmo-modal') || el.id === 'plasmo-modal'),
         );
 
+        // selection in modal
         if (isInsideModal) {
-            // selection trong modal → bỏ qua
             return;
         }
 
-        const sel = window.getSelection();
-        const text = sel?.toString().trim();
-        if (!text) return;
+        if (!text) {
+            chrome.runtime.sendMessage({ type: 'TEXT_SELECTED', text: null });
+            setCurrentText(null);
+            setButtonPos(null);
+            return;
+        }
 
         const anchorNode = sel.anchorNode;
         if (!anchorNode) return;
-
-        // Lấy vị trí selection
+        chrome.runtime.sendMessage({ type: 'TEXT_SELECTED', text });
+        // selection offset
         const rect = sel.getRangeAt(0).getBoundingClientRect();
         if (!rect) return;
 
@@ -141,6 +150,22 @@ const ContentUIInner: React.FC = () => {
         };
     }, []);
 
+    useEffect(() => {
+        const listener = (msg: any) => {
+            if (msg.type === 'CLICK_SUMAI_CONTEXT') {
+                if (msg.text) {
+                    handleSend({ text: msg.text });
+                }
+            }
+        };
+
+        chrome.runtime.onMessage.addListener(listener);
+
+        return () => {
+            chrome.runtime.onMessage.removeListener(listener);
+        };
+    }, [handleSend]);
+
     const handleRefresh = async ({
         model,
         language,
@@ -155,10 +180,22 @@ const ContentUIInner: React.FC = () => {
         handleSend({ text: selectedText, model, language, textCount, mode });
     };
 
+    const handleContextMenu = () => {
+        const sel = window.getSelection();
+        const text = sel?.toString().trim() || null;
+        chrome.runtime.sendMessage({ type: 'TEXT_SELECTED', text });
+        if (!text) {
+            setCurrentText(null);
+        }
+    };
+
     useEffect(() => {
         document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('contextmenu', handleContextMenu);
+
         return () => {
             document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener('contextmenu', handleContextMenu);
         };
     }, []);
 
@@ -174,13 +211,6 @@ const ContentUIInner: React.FC = () => {
                 />
             )}
 
-            {/* <SelectionButton
-                text={selectedText}
-                x={buttonPos.x}
-                y={buttonPos.y}
-                onSend={handleSend}
-                onOutsideClick={hideButton}
-            /> */}
             {isOpenModal && (
                 <Modal
                     content={modalContent}
@@ -189,13 +219,6 @@ const ContentUIInner: React.FC = () => {
                     isStreaming={streaming}
                 />
             )}
-
-            {/* <Modal
-                content={modalContent}
-                onClose={() => setIsOpenModal(false)}
-                onRefresh={handleRefresh}
-                isStreaming={streaming}
-            /> */}
         </div>
     );
 };

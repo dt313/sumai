@@ -128,6 +128,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                                     data-tooltip-id="summary-tooltip"
                                     data-tooltip-content="Summary"
                                     onMouseDown={preventMouseEvent}
+                                    disabled={isStreaming}
                                 >
                                     {/* <PencilLine className="pen-icon" size={18} /> */}
                                     <img className="re-summary-img" src={images.bard} />

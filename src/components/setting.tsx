@@ -64,8 +64,8 @@ function Setting() {
 
             {[
                 { id: 'logoVisible', label: 'Logo Visible', key: 'isLogoVisible' },
-                { id: 'doubleClick', label: 'Double Click to Summarize', key: 'isDoubleClick' },
-                { id: 'shiftSummarize', label: 'Shift to Summarize', key: 'isShift' },
+                { id: 'doubleClick', label: 'Double Click to Ask', key: 'isDoubleClick' },
+                { id: 'shift', label: 'Shift to Ask', key: 'isShift' },
                 { id: 'darkTheme', label: 'Dark Theme', key: 'isDarkTheme' },
             ].map(({ id, label, key }) => (
                 <div key={id} className="flex items-center gap-2">
