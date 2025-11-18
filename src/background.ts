@@ -1,5 +1,5 @@
 import { defaultSetting } from '~constants';
-import { summarize } from '~services/summarize';
+import { ask } from '~services/ask';
 import type { KeyValidateRequestData, SummaryRequestData } from '~types';
 import getErrorMessage from '~utils/get-error-msg';
 // background.ts
@@ -23,18 +23,27 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 // Nhận message từ content
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    if (msg.type === 'SEND_SELECTED_TEXT') {
+    if (msg.type === 'ASK_TEXT') {
         const data = msg.data as SummaryRequestData;
         storage.get('apiKeys').then(({ apiKeys }) => {
             const ssuKey = apiKeys?.ssu || null;
             let summary = '';
 
-            summarize(ssuKey, data.model, data.text, data.language, data.textCount, data.mode, (chunk) => {
-                chrome.tabs.sendMessage(sender.tab!.id!, { type: 'SUMMARY_CHUNK', chunk });
+            ask(ssuKey, data.model, data.text, data.language, data.textCount, data.mode, (chunk) => {
+                chrome.tabs.sendMessage(sender.tab!.id!, { type: 'ASK_CHUNK', chunk });
                 summary += chunk;
             })
                 .then(() => sendResponse({ ok: true, data: { content: summary } }))
-                .catch((err) => sendResponse({ ok: false, error: { message: err.message || 'Summary Error' } }));
+                .catch((err) => {
+                    const errorMsg = getErrorMessage(err || 'Ask LLM error');
+
+                    chrome.tabs.sendMessage(sender.tab!.id!, {
+                        type: 'ASK_ERROR',
+                        error: errorMsg,
+                    });
+
+                    sendResponse({ ok: false, error: { message: errorMsg } });
+                });
         });
 
         return true; // giữ port mở
@@ -44,9 +53,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const data = msg.data as KeyValidateRequestData;
         validateProviderKey(data.provider, data.key)
             .then((isValid) => sendResponse({ ok: true, data: { isValid } }))
-            .catch((err) =>
-                sendResponse({ ok: false, error: { message: getErrorMessage(err) || 'Validation Error' } }),
-            );
+            .catch((err) => sendResponse({ ok: false, error: { message: getErrorMessage(err, 'Validation Error') } }));
 
         return true;
     }

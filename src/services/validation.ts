@@ -1,4 +1,4 @@
-import { CHATGPT_API_URL, CLAUDE_API_URL, GEMINI_API_URL, SSU_API_URL } from '~constants';
+import getErrorMessage from '~utils/get-error-msg';
 
 export const validateOpenAIKey = async (key: string): Promise<boolean> => {
     try {
@@ -15,7 +15,7 @@ export const validateOpenAIKey = async (key: string): Promise<boolean> => {
             throw data;
         }
     } catch (err) {
-        throw err?.error?.message || 'Open Api Key Invalid';
+        throw getErrorMessage(err);
     }
 };
 
@@ -42,7 +42,7 @@ export const validateClaudeKey = async (key: string): Promise<boolean> => {
             throw data;
         }
     } catch (error) {
-        throw 'Claude API Key Invalid';
+        throw getErrorMessage(error || 'Validate claude key error');
     }
 };
 
@@ -73,7 +73,7 @@ export const validateGeminiKey = async (key: string): Promise<boolean> => {
             throw data;
         }
     } catch (error) {
-        throw error.error.message || 'Gemini API Key Invalid';
+        throw getErrorMessage(error?.error || 'Validate gemini key error');
     }
 };
 
@@ -99,6 +99,6 @@ export const validateSSUKey = async (key: string): Promise<boolean> => {
             throw data;
         }
     } catch (error) {
-        throw error?.error || error?.detail || 'SSU API Key Invalid ';
+        throw getErrorMessage(error?.error || error?.detail, 'Validation ssu key error');
     }
 };

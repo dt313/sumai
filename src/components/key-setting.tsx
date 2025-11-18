@@ -1,33 +1,24 @@
 import { useEffect, useState } from 'react';
 
 import { keyInputs } from '~/configs/ui';
-import { storage } from '~/utils/storage';
+import { useStorageApiKeys, type ApiKeys } from '~hooks/use-storage-key';
 import type { BackgroundResponse, KeyInput, KeyValidateRequestData, Provider } from '~types';
 
 import ApiKeyForm from './api-key-form';
 
 function KeySetting() {
-    const [keys, setKeys] = useState({
-        openai: '',
-        gemini: '',
-        claude: '',
-        ssu: '',
-    });
+    const { apiKeys, updateKeys } = useStorageApiKeys();
+    const [tempKeys, setTempKeys] = useState<ApiKeys>(apiKeys);
 
     useEffect(() => {
-        const loadKeys = async () => {
-            const result = await storage.get('apiKeys');
-            if (result.apiKeys) setKeys(result.apiKeys);
-        };
-        loadKeys();
-    }, []);
-
-    const saveKey = async (name: Provider) => {
+        setTempKeys(apiKeys);
+    }, [apiKeys]);
+    const saveKey = async (provider: Provider) => {
         try {
-            const newKeys = { ...keys };
+            const keyValue = tempKeys[provider];
             const data: KeyValidateRequestData = {
-                provider: name,
-                key: keys[name],
+                provider,
+                key: keyValue,
             };
 
             // Đợi kết quả validate từ background
@@ -39,18 +30,18 @@ function KeySetting() {
             });
 
             if (res?.ok && res?.data?.isValid) {
-                await storage.set({ apiKeys: newKeys });
+                await updateKeys({ [provider]: keyValue });
                 return;
             } else {
-                throw new Error(res?.error?.message || `${name.toUpperCase()} API key không hợp lệ!`);
+                throw new Error(res?.error?.message || `${provider.toUpperCase()} API key không hợp lệ!`);
             }
         } catch (error) {
-            throw new Error(error?.message || `${name.toUpperCase()} API key không hợp lệ!`);
+            throw new Error(error?.message || `${provider.toUpperCase()} API key không hợp lệ!`);
         }
     };
 
-    const handleChange = (value, name: string) => {
-        setKeys((prev) => ({ ...prev, [name]: value }));
+    const handleChange = (value: string, provider: Provider) => {
+        setTempKeys((prev) => ({ ...prev, [provider]: value }));
     };
 
     return (
@@ -63,7 +54,7 @@ function KeySetting() {
                     logo={logo}
                     link={link}
                     placeholder={placeholder}
-                    value={keys[provider]}
+                    value={tempKeys[provider]}
                     onChange={handleChange}
                     onSave={saveKey}
                 />

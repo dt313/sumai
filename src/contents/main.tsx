@@ -1,20 +1,19 @@
+import { error } from 'console';
 import contentStyle from 'data-text:./styles/content.css';
 import markdownStyle from 'data-text:./styles/markdown.css';
 import toolTips from 'data-text:./styles/tooltip.css';
 import type { PlasmoCSConfig } from 'plasmo';
 import React, { useEffect, useState } from 'react';
 
+import { GlobalErrorBoundary } from '~components/global-error-boundary';
 import { TemporarySettingProvider, useTemporarySetting } from '~context/setting-context';
 import { useSendOnDoubleClick } from '~hooks/use-send-on-double-click';
 import { useSendOnShift } from '~hooks/use-send-on-shift';
 import type { ModelType, ModeType, SettingState, SummaryRequestData } from '~types';
+import getErrorMessage from '~utils/get-error-msg';
 
 import Modal from '../components/content/modal.content';
 import SelectionButton from '../components/content/selection-button.content';
-
-import 'highlight.js/styles/github-dark.css';
-
-import { GlobalErrorBoundary } from '~components/global-error-boundary';
 
 export const config: PlasmoCSConfig = {
     matches: ['<all_urls>'],
@@ -62,12 +61,11 @@ const ContentUIInner: React.FC = () => {
         };
 
         try {
-            chrome.runtime.sendMessage({ type: 'SEND_SELECTED_TEXT', data: requestData }, (res: any) => {
+            chrome.runtime.sendMessage({ type: 'ASK_TEXT', data: requestData }, (res: any) => {
                 if (!res?.ok) console.error(res?.error);
                 setStreaming(false);
             });
         } catch (e) {
-            console.warn('Cannot send message:', e);
             setStreaming(false);
         }
     };
@@ -128,8 +126,12 @@ const ContentUIInner: React.FC = () => {
 
     useEffect(() => {
         const chunkListener = (msg: any) => {
-            if (msg.type === 'SUMMARY_CHUNK') {
+            if (msg.type === 'ASK_CHUNK') {
                 setModalContent((prev) => prev + msg.chunk.replace(/([^\n])\n([^\n])/g, '$1\n\n$2'));
+            }
+            // ERRORS
+            if (msg.type === 'ASK_ERROR') {
+                setModalContent(`❌ Error: ${getErrorMessage(msg.error)}`);
             }
         };
 
@@ -160,6 +162,8 @@ const ContentUIInner: React.FC = () => {
             document.removeEventListener('mouseup', handleMouseUp);
         };
     }, []);
+
+    console.log({ modalContent });
 
     return (
         <div className={`${tempSetting.isDarkTheme ? 'dark' : 'light'} `}>

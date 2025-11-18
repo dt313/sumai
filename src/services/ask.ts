@@ -1,5 +1,6 @@
 import { SSU_API_URL, SSU_MODEL_ENDPOINTS } from '~constants';
 import type { ModelType, ModeType } from '~types';
+import getErrorMessage from '~utils/get-error-msg';
 import {
     buildClaudeBody,
     buildClaudeHeaders,
@@ -120,7 +121,7 @@ const handleStreamingResponse = async (
                         break;
                 }
             } catch (err) {
-                console.warn(`Error parsing ${model} chunk:`, err);
+                throw getErrorMessage(err);
             }
         });
     }
@@ -128,7 +129,7 @@ const handleStreamingResponse = async (
     return summary;
 };
 
-export const summarize = async (
+export const ask = async (
     key: string,
     model: ModelType,
     text: string,
@@ -148,13 +149,19 @@ export const summarize = async (
         maxTokens: textCount,
     });
 
-    console.log({ headers, body });
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body),
+        });
 
-    const response = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-    });
-
-    return handleStreamingResponse(response, model, onChunk);
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(`${getErrorMessage(err, 'Request Error')}`);
+        }
+        await handleStreamingResponse(response, model, onChunk);
+    } catch (error) {
+        throw new Error(`${getErrorMessage(error, 'Ask LLM error')}`);
+    }
 };
