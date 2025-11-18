@@ -87,7 +87,7 @@ export const buildGeminiBody = ({ model = DEFAULT_GEMINI_MODEL, systemPrompt, us
     if (userPrompt) {
         contents.push({
             role: 'user',
-            parts: [{ text: userPrompt }],
+            parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
         });
     }
 

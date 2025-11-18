@@ -45,19 +45,60 @@ const generatePrompt = (
 
     switch (mode) {
         case 'summary':
-            systemPrompt = `You are a helpful assistant. Only summarize the text. Do NOT add explanations, opinions, or extra content. Focus strictly on key points.`;
-            userPrompt = `Summarize the following text in ${language} using no more than ${textCount} words. Only include key points:\n\n${text}`;
+            systemPrompt = `You are a professional summarizer. 
+                            Create a concise, thorough, and comprehensive summary of the provided text.
+                            Focus strictly on the main ideas and essential information.
+                            Do NOT include opinions, explanations, or any extra content.
+                            Format the summary in clear paragraph form.
+                            Do NOT exceed ${textCount} words.
+                            Response markdown format.`;
+
+            userPrompt = `Summarize the following text in ${language} using **no more than ${textCount} words**.  
+                            Include all key points and critical information, eliminating any unnecessary details.  
+                            Rely solely on the provided text and do not introduce external knowledge.  
+                            Ensure the summary is coherent, well-structured, and easy to read. 
+                            Response markdown format.
+                             Do NOT exceed ${textCount} words.
+                            Text to summarize:\n\n${text}`;
+            break;
             break;
 
         case 'translate':
-            systemPrompt = `You are a helpful assistant. Your task is to translate the text accurately without adding or removing meaning. No explanations.`;
-            userPrompt = `Translate the following text into ${language}:\n\n${text}`;
+            systemPrompt = `You are a professional translator. Accurately translate the text into the target language specified by the user without adding, omitting, or altering the meaning. Do NOT include explanations or extra content.`;
+
+            userPrompt = `Translate the following text into (${language}) language according to these rules:
+
+            1. If the text is a single word or short phrase (vocabulary), respond in **Markdown bullet format** like this:
+
+            - **Word:** <original word/phrase>
+            - **Meanings:** <translated word/phrase in ${language}>
+            - **Part of Speech:** <noun, verb, adjective, etc.>
+            - **Example:** <short usage example in ${language}>
+
+            2. If the text is a complete sentence or paragraph, respond with the fully translated text only in paragraph form, in ${language}, preserving clarity, grammar, and natural flow.
+
+            Text to translate:\n\n${text}`;
             break;
 
         case 'explain':
-            systemPrompt = `You are a helpful assistant. Explain the text in a simple and clear way suitable for beginners. Do NOT add unrelated information.`;
-            userPrompt = `Explain the following text in ${language}, using no more than ${textCount} words:\n\n${text}`;
-            break;
+            systemPrompt = `You are a professional teaching assistant and language explainer.  
+                     Your task is to explain the provided text in a clear, simple, and beginner-friendly way.  
+                     Focus strictly on the content given. Do NOT add unrelated information, opinions, or external knowledge.  
+                     Use examples or analogies if they help clarify the concepts.  
+                     Format the explanation in **Markdown**, using paragraphs, bullets, or numbered lists when appropriate.
+                    Do NOT exceed ${textCount} words.
+                     `;
+
+            userPrompt = `Explain the following text in ${language}, using no more than ${textCount} words:
+
+            - Provide a simple and clear explanation suitable for beginners.  
+            - Break down complex concepts into easy-to-understand points.  
+            - Use bullets or numbered lists if needed to organize ideas.  
+            - Include short examples or analogies if helpful.  
+            - Conclude clearly so the reader understands the main ideas.
+            -  Do NOT exceed ${textCount} words.
+
+            Text to explain:\n\n${text}`;
     }
 
     return { systemPrompt, userPrompt };
