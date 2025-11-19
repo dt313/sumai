@@ -2,7 +2,7 @@
     "name": "sumai",
     "displayName": "Sumai",
     "version": "0.0.1",
-    "description": "An Browser extension to summarize long content to your native language using LLM AI",
+    "description": "Sumai – Summarize, explain, and translate content directly in your browser using LLM AI in your language.",
     "author": "tnguyen_dev",
     "scripts": {
         "dev": "plasmo dev --auto-reload",

@@ -70,10 +70,10 @@ const generatePrompt = (
 
             1. If the text is a single word or short phrase (vocabulary), respond in **Markdown bullet format** like this:
 
-            - **Word:** <original word/phrase>
-            - **Meanings:** <translated word/phrase in ${language}>
+            - ### Word:  <span style="font-weight:300;"><original word/phrase></span>
+            - ### Meanings:  <span style="font-weight:300;"><original word/phrase></span>
             - **Part of Speech:** <noun, verb, adjective, etc.>
-            - **Example:** <short usage example in ${language}>
+            - **Example:** <short usage example in original language>
 
             2. If the text is a complete sentence or paragraph, respond with the fully translated text only in paragraph form, in ${language}, preserving clarity, grammar, and natural flow.
 

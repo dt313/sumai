@@ -10,7 +10,20 @@ export const useSendOnDoubleClick = ({
     hideButton: () => void;
 }) => {
     useEffect(() => {
-        const onDoubleClick = () => {
+        const onDoubleClick = (e: MouseEvent) => {
+            if (isOpenModal) {
+                const path = e.composedPath?.();
+                const isInsideModal = path?.some(
+                    (el) =>
+                        el instanceof HTMLElement &&
+                        (el.classList.contains('plasmo-modal') || el.id === 'plasmo-modal'),
+                );
+
+                // selection in modal
+                if (isInsideModal) {
+                    return;
+                }
+            }
             const selection = window.getSelection()?.toString().trim();
             if (!selection) return;
 

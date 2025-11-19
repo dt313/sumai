@@ -86,7 +86,7 @@ const ContentUIInner: React.FC = () => {
     };
 
     useSendOnShift({
-        selectedText,
+        selectedText: currentText,
         isOpenModal,
         handleSend: tempSetting?.isShift ? handleSend : () => {},
         hideButton: hideButton,

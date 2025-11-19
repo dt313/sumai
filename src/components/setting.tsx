@@ -44,7 +44,7 @@ function Setting() {
             {/* Model select */}
 
             <Selection
-                label="Summary Language"
+                label="Language"
                 list={languageSelection}
                 value={setting.language}
                 onChange={(v) => update('language', v)}
