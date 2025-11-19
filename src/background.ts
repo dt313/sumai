@@ -22,7 +22,7 @@ const createContextMenu = () => {
 
 const removeContextMenu = () => {
     if (menuCreated) {
-        chrome.contextMenus.remove('my-custom-menu');
+        chrome.contextMenus.remove('sum-ai');
         menuCreated = false;
     }
 };

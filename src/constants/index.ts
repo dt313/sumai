@@ -22,7 +22,7 @@ export const TEXT_COUNT_MAX = 1000;
 
 export const defaultSetting: SettingState = {
     model: 'chatgpt',
-    language: 'vietnamese',
+    language: 'english',
     isLogoVisible: true,
     isDoubleClick: false,
     isShift: true,

@@ -43,6 +43,10 @@ function Setting() {
         <div className="w-full font-sans space-y-3">
             {/* Model select */}
 
+            <h1 className="text-xl font-bold tracking-wide text-gray-700 dark:text-gray-200 text-center">
+                Default Setting
+            </h1>
+
             <Selection
                 label="Language"
                 list={languageSelection}
