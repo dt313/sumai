@@ -96,6 +96,7 @@ const ContentUIInner: React.FC = () => {
 
     useSendOnDoubleClick({
         isOpenModal,
+        streaming,
         handleSend: tempSetting?.isDoubleClick ? handleSend : () => {},
         hideButton: hideButton,
     });

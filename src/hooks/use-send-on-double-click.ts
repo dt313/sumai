@@ -3,14 +3,17 @@ import { useEffect } from 'react';
 export const useSendOnDoubleClick = ({
     isOpenModal,
     handleSend,
+    streaming,
     hideButton,
 }: {
     isOpenModal: boolean;
+    streaming: boolean;
     handleSend: ({ text }: { text: string }) => void;
     hideButton: () => void;
 }) => {
     useEffect(() => {
         const onDoubleClick = (e: MouseEvent) => {
+            if (streaming) return;
             if (isOpenModal) {
                 const path = e.composedPath?.();
                 const isInsideModal = path?.some(
