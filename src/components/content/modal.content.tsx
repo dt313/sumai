@@ -123,7 +123,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                             </div>
                             <Tooltip content="Ask">
                                 <button
-                                    className="re-summary-btn"
+                                    className={`re-ask-btn`}
                                     onClick={handleRefresh}
                                     data-tooltip-id="summary-tooltip"
                                     data-tooltip-content="Summary"
@@ -131,7 +131,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                                     disabled={isStreaming}
                                 >
                                     {/* <PencilLine className="pen-icon" size={18} /> */}
-                                    <img className="re-summary-img" src={images.bard} />
+                                    <img className="re-ask-img" src={images.bard} />
                                 </button>
                             </Tooltip>
                         </div>

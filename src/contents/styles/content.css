@@ -167,7 +167,7 @@
 
 /* Resumary button */
 
-.re-summary-btn {
+.re-ask-btn {
     background-color: var(--bg-color);
     outline: none;
     border: 1.5px solid var(--border-color);
@@ -181,11 +181,16 @@
     align-items: center;
 }
 
-.re-summary-btn:hover {
+.re-ask-btn:disabled {
+    background-color: #9a9a9a22;
+    cursor: not-allowed;
+}
+
+.re-ask-btn:hover {
     opacity: 0.8;
 }
 
-.re-summary-img {
+.re-ask-img {
     width: 20px;
     height: 20px;
     object-fit: contain;
