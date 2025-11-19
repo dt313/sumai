@@ -70,6 +70,8 @@ const ContentUIInner: React.FC = () => {
             });
         } catch (e) {
             setStreaming(false);
+        } finally {
+            hideButton();
         }
     };
 

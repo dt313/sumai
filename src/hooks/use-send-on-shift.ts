@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 export const useSendOnShift = ({
     selectedText,
@@ -13,7 +13,6 @@ export const useSendOnShift = ({
     handleSend: ({ text }: { text: string }) => void;
     hideButton: () => void;
 }) => {
-    console.log({ selectedText });
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key !== 'Shift' || !selectedText) return;
