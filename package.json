@@ -44,9 +44,6 @@
     "manifest": {
         "permissions": [
             "storage",
-            "activeTab",
-            "tabs",
-            "scripting",
             "contextMenus"
         ],
         "host_permissions": [
