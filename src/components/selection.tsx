@@ -49,13 +49,12 @@ const Option = ({ label, value, image, onClick, checked }) => {
 };
 
 export default function Selection({ label, list = [], value, onChange }: SelectionType) {
-    const itemLabel = useMemo(() => {
-        return list.find((i) => i.value === value).label;
-    }, [value]);
+    const selected = useMemo(() => {
+        return list.find((i) => i.value === value);
+    }, [list, value]);
 
-    const image = useMemo(() => {
-        return list.find((i) => i.value === value)?.image || null;
-    }, [value]);
+    const itemLabel = selected?.label || '';
+    const image = selected?.image || null;
     return (
         <Listbox value={value} onChange={onChange}>
             {label && <Label className="block text-sm/6 font-medium">{label}</Label>}

@@ -1,4 +1,4 @@
-import { OLAMA_URL, SSU_API_URL, SSU_MODEL_ENDPOINTS } from '~constants';
+import { MODEL_ENDPOINTS } from '~constants';
 import type { ModelType, ModeType } from '~types';
 import getErrorMessage from '~utils/get-error-msg';
 import {
@@ -16,6 +16,7 @@ const MODEL_HEADERS: Record<ModelType, (key: string) => Record<string, string>> 
     chatgpt: buildOpenAIHeaders,
     claude: buildClaudeHeaders,
     gemini: buildGeminiHeaders,
+    olama: buildOLAMAHeaders,
 };
 
 type BodyBuilderParams = {
@@ -27,13 +28,10 @@ type BodyBuilderParams = {
 };
 
 export const MODEL_BODY_BUILDERS: Record<ModelType, (params: BodyBuilderParams) => any> = {
-    chatgpt: ({ systemPrompt, userPrompt, model, stream }) =>
-        buildOpenAIBody({ systemPrompt: systemPrompt, userPrompt, stream }),
-
-    claude: ({ systemPrompt, userPrompt, model, maxTokens }) =>
-        buildClaudeBody({ systemPrompt, userPrompt, maxTokens }),
-
-    gemini: ({ systemPrompt, userPrompt, model, stream }) => buildGeminiBody({ systemPrompt, userPrompt }),
+    chatgpt: ({ systemPrompt, userPrompt, stream }) => buildOpenAIBody({ systemPrompt, userPrompt, stream }),
+    claude: ({ systemPrompt, userPrompt, maxTokens }) => buildClaudeBody({ systemPrompt, userPrompt, maxTokens }),
+    gemini: ({ systemPrompt, userPrompt }) => buildGeminiBody({ systemPrompt, userPrompt }),
+    olama: ({ systemPrompt, userPrompt, stream }) => buildOLAMABody({ systemPrompt, userPrompt, stream }),
 };
 
 const generatePrompt = (
@@ -116,6 +114,7 @@ const handleStreamingResponse = async (
     const decoder = new TextDecoder('utf-8');
     let done = false;
     let summary = '';
+    let buffer = '';
 
     while (!done) {
         const { value, done: readerDone } = await reader.read();
@@ -124,49 +123,68 @@ const handleStreamingResponse = async (
 
         const chunkText = decoder.decode(value, { stream: true });
 
-        chunkText.split('\n').forEach((line) => {
-            line = line.trim();
-            if (!line || !line.startsWith('data:')) return;
-            const jsonStr = line.replace(/^data: /, '');
-            if (jsonStr === '[DONE]') return;
+        if (model === 'olama') {
+            buffer += chunkText;
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
 
-            try {
-                const parsed = JSON.parse(jsonStr);
-
-                switch (model) {
-                    case 'chatgpt': {
-                        const content = parsed.choices?.[0]?.delta?.content;
-                        if (content) {
-                            summary += content;
-                            if (onChunk) onChunk(content);
-                        }
-                        break;
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                try {
+                    const parsed = JSON.parse(line);
+                    if (parsed.response) {
+                        summary += parsed.response;
+                        if (onChunk) onChunk(parsed.response);
                     }
-                    case 'gemini': {
-                        const parts = parsed.candidates?.[0]?.content?.parts;
-                        if (parts && parts.length > 0) {
-                            const text = parts.map((p: any) => p.text).join('');
-                            summary += text;
-                            if (onChunk) onChunk(text);
-                        }
-                        break;
-                    }
-                    case 'claude': {
-                        const text = parsed.delta?.text;
-                        if (text) {
-                            summary += text;
-                            if (onChunk) onChunk(text);
-                        }
-                        break;
-                    }
-
-                    default:
-                        break;
+                    if (parsed.done) done = true;
+                } catch (err) {
+                    console.error('Ollama parse error:', err);
                 }
-            } catch (err) {
-                throw getErrorMessage(err);
             }
-        });
+        } else {
+            chunkText.split('\n').forEach((line) => {
+                line = line.trim();
+                if (!line || !line.startsWith('data:')) return;
+                const jsonStr = line.replace(/^data: /, '');
+                if (jsonStr === '[DONE]') return;
+
+                try {
+                    const parsed = JSON.parse(jsonStr);
+
+                    switch (model) {
+                        case 'chatgpt': {
+                            const content = parsed.choices?.[0]?.delta?.content;
+                            if (content) {
+                                summary += content;
+                                if (onChunk) onChunk(content);
+                            }
+                            break;
+                        }
+                        case 'gemini': {
+                            const parts = parsed.candidates?.[0]?.content?.parts;
+                            if (parts && parts.length > 0) {
+                                const text = parts.map((p: any) => p.text).join('');
+                                summary += text;
+                                if (onChunk) onChunk(text);
+                            }
+                            break;
+                        }
+                        case 'claude': {
+                            const text = parsed.delta?.text;
+                            if (text) {
+                                summary += text;
+                                if (onChunk) onChunk(text);
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (err) {
+                    console.error('SSE parse error:', err);
+                }
+            });
+        }
     }
 
     return summary;
@@ -183,105 +201,24 @@ export const ask = async (
 ) => {
     const { systemPrompt, userPrompt } = generatePrompt(language, textCount, text, mode);
 
-    const url = SSU_MODEL_ENDPOINTS[model];
-
+    const url = MODEL_ENDPOINTS[model];
     const headers = MODEL_HEADERS[model](key);
     const body = MODEL_BODY_BUILDERS[model]({
         systemPrompt,
         userPrompt,
         maxTokens: textCount,
+        stream: true,
     });
 
     try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(body),
-        });
+        const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
 
         if (!response.ok) {
             const err = await response.json();
             throw new Error(`${getErrorMessage(err, 'Request Error')}`);
         }
-        await handleStreamingResponse(response, model, onChunk);
+        return await handleStreamingResponse(response, model, onChunk);
     } catch (error) {
         throw new Error(`${getErrorMessage(error, 'Ask LLM error')}`);
     }
-};
-
-export const askOLAMA = async (
-    key: string,
-    text: string,
-    language: string = 'English',
-    textCount: number = 50,
-    mode: ModeType = 'summary',
-    onChunk?: (chunk: string) => void,
-) => {
-    try {
-        const { systemPrompt, userPrompt } = generatePrompt(language, textCount, text, mode);
-
-        const headers = buildOLAMAHeaders(key);
-        const body = buildOLAMABody({ systemPrompt, userPrompt, stream: true });
-
-        const response = await fetch(OLAMA_URL, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(`${getErrorMessage(err, 'Request Error')}`);
-        }
-
-        return await handleOllamaStreamingResponse(response, onChunk);
-    } catch (error) {
-        throw new Error(`${getErrorMessage(error, 'Ask LLM error')}`);
-    }
-};
-
-const handleOllamaStreamingResponse = async (
-    response: Response,
-    onChunk?: (chunk: string) => void,
-): Promise<string> => {
-    if (!response.body) throw new Error('No response body for streaming');
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-
-    let done = false;
-    let result = '';
-    let buffer = '';
-
-    while (!done) {
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-        if (!value) continue;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-            if (!line.trim()) continue;
-
-            try {
-                const parsed = JSON.parse(line);
-
-                if (parsed.response) {
-                    result += parsed.response;
-                    if (onChunk) onChunk(parsed.response);
-                }
-
-                if (parsed.done) {
-                    return result;
-                }
-            } catch (err) {
-                throw getErrorMessage(err);
-            }
-        }
-    }
-
-    return result;
 };

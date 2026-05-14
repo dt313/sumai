@@ -8,7 +8,7 @@ import '../style.css';
 
 function OptionPage() {
     return (
-        <div className="min-h-screen w-full flex justify-center items-center bg-bg-light overflow-y-auto p-6">
+        <div className="min-h-screen w-full flex justify-center items-start sm:items-center bg-bg-light overflow-y-auto p-6 ">
             <div className="max-w-[980px] max-h-[600px] w-full flex flex-wrap gap-6">
                 {/* Cột phải: KeySetting */}
                 <div className="flex-1 bg-bg-light p-4 rounded shadow">

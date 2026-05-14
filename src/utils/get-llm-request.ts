@@ -1,6 +1,6 @@
-const DEFAULT_OPENAI_MODEL = 'gpt-5-chat-latest';
+const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
-const DEFAULT_CLAUDE_MODEL = 'claude-sonnet-4-5-20250929';
+const DEFAULT_CLAUDE_MODEL = 'claude-3-5-sonnet-20241022';
 
 // header
 
@@ -11,12 +11,14 @@ export const buildOpenAIHeaders = (key: string) => ({
 
 export const buildClaudeHeaders = (apiKey: string) => ({
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${apiKey}`,
+    'x-api-key': apiKey,
     'anthropic-version': '2023-06-01',
+    'anthropic-dangerous-direct-browser-access': 'true',
 });
+
 export const buildGeminiHeaders = (key: string) => ({
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${key}`,
+    'x-goog-api-key': key,
 });
 
 export const buildOLAMAHeaders = (key: string) => ({

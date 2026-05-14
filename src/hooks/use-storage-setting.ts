@@ -20,6 +20,7 @@ export const useStorageSetting = () => {
         // 2. Load giá trị hiện tại khi mount
         const loadInitialSetting = async () => {
             const { setting: storedSetting } = await storage.get('setting');
+
             setSetting(storedSetting || {});
         };
         loadInitialSetting();

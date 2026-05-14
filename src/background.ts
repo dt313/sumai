@@ -1,5 +1,5 @@
 import { defaultApiKeys, defaultSetting } from '~constants';
-import { ask, askOLAMA } from '~services/ask';
+import { ask } from '~services/ask';
 import type { KeyValidateRequestData, SummaryRequestData } from '~types';
 import getErrorMessage from '~utils/get-error-msg';
 // background.ts
@@ -53,13 +53,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === 'ASK_TEXT') {
         const data = msg.data as SummaryRequestData;
         storage.get('apiKeys').then(({ apiKeys }) => {
-            const ssuKey = apiKeys?.ssu || null;
-            const olamaKey = apiKeys?.olama || null;
-            const model = ssuKey || olamaKey;
+            const providerKey = apiKeys[data.model];
             let summary = '';
 
-            if (ssuKey) {
-                ask(ssuKey, data.model, data.text, data.language, data.textCount, data.mode, (chunk) => {
+            console.log('Received ASK_TEXT message:', { data, providerKey: !!providerKey });
+
+            if (providerKey) {
+                ask(providerKey, data.model, data.text, data.language, data.textCount, data.mode, (chunk) => {
                     chrome.tabs.sendMessage(sender.tab!.id!, { type: 'ASK_CHUNK', chunk });
                     summary += chunk;
                 })
@@ -74,21 +74,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
                         sendResponse({ ok: false, error: { message: errorMsg } });
                     });
-            } else if (olamaKey) {
-                askOLAMA(olamaKey, data.text, data.language, data.textCount, data.mode, (chunk) => {
-                    chrome.tabs.sendMessage(sender.tab!.id!, { type: 'ASK_CHUNK', chunk });
-                    summary += chunk;
-                })
-                    .then(() => sendResponse({ ok: true, data: { content: summary } }))
-                    .catch((err) => {
-                        const errorMsg = getErrorMessage(err || 'Ask LLM error');
-                        chrome.tabs.sendMessage(sender.tab!.id!, {
-                            type: 'ASK_ERROR',
-                            error: errorMsg,
-                        });
-
-                        sendResponse({ ok: false, error: { message: errorMsg } });
-                    });
+            } else {
+                const errorMsg = `API key for ${data.model} is not set. Please set it in the options page.`;
+                chrome.tabs.sendMessage(sender.tab!.id!, {
+                    type: 'ASK_ERROR',
+                    error: errorMsg,
+                });
+                sendResponse({ ok: false, error: { message: errorMsg } });
             }
         });
 

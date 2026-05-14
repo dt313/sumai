@@ -43,7 +43,7 @@ export default function Button({
         ${className}
       `}
         >
-            {loading && <SpinLoading colorClass={variant === 'secondary' ? 'text-gray-800' : 'text-white'} />}
+            {loading && <SpinLoading colorClass={spinnerColor} />}
             {leftIcon && (
                 <span className={`flex items-center ${loading ? 'opacity-0' : 'opacity-100'}`}>{leftIcon}</span>
             )}

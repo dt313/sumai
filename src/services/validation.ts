@@ -29,7 +29,7 @@ export const validateClaudeKey = async (key: string): Promise<boolean> => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-5-20250929',
+                model: 'claude-3-5-sonnet-20241022',
                 max_tokens: 1,
                 messages: [{ role: 'user', content: 'Test' }],
             }),
@@ -74,32 +74,6 @@ export const validateGeminiKey = async (key: string): Promise<boolean> => {
         }
     } catch (error) {
         throw getErrorMessage(error?.error || 'Validate gemini key error');
-    }
-};
-
-export const validateSSUKey = async (key: string): Promise<boolean> => {
-    try {
-        const res = await fetch(`https://factchat-cloud.mindlogic.ai/v1/api/anthropic/messages`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${key}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: 'claude-sonnet-4-5-20250929',
-                max_tokens: 1024,
-                messages: [{ role: 'user', content: 'Test' }],
-            }),
-        });
-
-        if (res?.ok) {
-            return true;
-        } else {
-            const data = await res.json();
-            throw data;
-        }
-    } catch (error) {
-        throw getErrorMessage(error?.error || error?.detail, 'Validation ssu key error');
     }
 };
 

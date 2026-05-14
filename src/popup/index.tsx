@@ -18,7 +18,7 @@ function IndexPopup() {
         const checkKeys = async () => {
             const result = await storage.get('apiKeys');
             const apiKeys = result?.apiKeys;
-            const hasAnyKey = apiKeys?.openai || apiKeys?.gemini || apiKeys?.anthropic;
+            const hasAnyKey = apiKeys?.openai || apiKeys?.gemini || apiKeys?.anthropic || apiKeys?.olama;
             setShowKeys(!hasAnyKey); // nếu chưa có key thì hiển thị KeyInput
             setLoading(false);
         };

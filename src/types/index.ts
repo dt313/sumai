@@ -1,22 +1,10 @@
-export type BackgroundResponse = {
-    ok: boolean;
-    data?: any;
-    error?: {
-        message?: string;
-    };
-};
+export type BackgroundResponse = { ok: boolean; data?: any; error?: { message?: string } };
 
-export type ModelType = 'chatgpt' | 'claude' | 'gemini';
+export type ModelType = 'chatgpt' | 'claude' | 'gemini' | 'olama';
 export type ModeType = 'translate' | 'summary' | 'explain';
-export type Provider = ModelType | 'ssu' | 'olama';
+export type Provider = ModelType | 'olama';
 
-export type KeyInput = {
-    label: string;
-    provider: Provider;
-    logo: string;
-    placeholder?: string;
-    link: string;
-};
+export type KeyInput = { label: string; provider: Provider; logo: string; placeholder?: string; link: string };
 
 export type SummaryRequestData = {
     text: string;
@@ -26,10 +14,7 @@ export type SummaryRequestData = {
     mode: ModeType;
 };
 
-export type KeyValidateRequestData = {
-    provider: Provider;
-    key: string;
-};
+export type KeyValidateRequestData = { provider: Provider; key: string };
 
 export type SettingState = {
     model: string;
@@ -42,9 +27,4 @@ export type SettingState = {
     isDarkTheme: boolean;
 };
 
-export type ApiKeys = {
-    ssu: string;
-    chatgpt: string;
-    claude: string;
-    gemini: string;
-};
+export type ApiKeys = { chatgpt: string; claude: string; gemini: string; olama: string };

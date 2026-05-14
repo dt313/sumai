@@ -1,5 +1,5 @@
 import { Copy, X } from 'lucide-react';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import images from '~/assets/images';
@@ -8,6 +8,7 @@ import { languageSelection, modelSelection, modeSelection } from '~configs/ui';
 import { TEXT_COUNT_MAX, TEXT_COUNT_MIN } from '~constants';
 import { useTemporarySetting } from '~context/setting-context';
 import { useDraggable } from '~hooks/use-draggable';
+import { useStorageApiKeys } from '~hooks/use-storage-key';
 import type { ModelType, ModeType } from '~types';
 
 import NumberInput from './number-input.content';
@@ -37,6 +38,19 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
     const [copied, setCopied] = useState(false);
     const copyTimeout = useRef<NodeJS.Timeout | null>(null);
     const { isDragging, dragRef, handleMouseDown } = useDraggable();
+    const { apiKeys } = useStorageApiKeys();
+
+    const filteredModelSelection = useMemo(() => {
+        return modelSelection.filter((model) => {
+            return apiKeys[model.value];
+        });
+    }, [apiKeys]);
+
+    useEffect(() => {
+        if (filteredModelSelection.length > 0 && !filteredModelSelection.some((m) => m.value === tempSetting.model)) {
+            updateTempSetting({ model: filteredModelSelection[0].value });
+        }
+    }, [filteredModelSelection, tempSetting.model, updateTempSetting]);
 
     const handleRefresh = useCallback(() => {
         onRefresh({
@@ -90,7 +104,7 @@ const Modal: React.FC<ModalProps> = ({ content, isStreaming, onClose, onRefresh 
                                 <Selection
                                     value={tempSetting.model}
                                     onChange={(v) => updateSetting('model', v)}
-                                    list={modelSelection}
+                                    list={filteredModelSelection}
                                 />
                             </div>
 

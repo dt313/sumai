@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { languageSelection, modelSelection, modeSelection } from '~configs/ui';
 import { defaultSetting, TEXT_COUNT_MAX, TEXT_COUNT_MIN } from '~constants';
+import { useStorageApiKeys } from '~hooks/use-storage-key';
 import type { SettingState } from '~types';
 import { storage } from '~utils/storage';
 
@@ -11,6 +12,7 @@ import SwitchButton from './switch-button';
 
 function Setting() {
     const [setting, setSetting] = useState<SettingState>(defaultSetting);
+    const { apiKeys } = useStorageApiKeys();
 
     useEffect(() => {
         const loadSetting = async () => {
@@ -23,6 +25,12 @@ function Setting() {
         loadSetting();
     }, []);
 
+    const filteredModelSelection = useMemo(() => {
+        return modelSelection.filter((model) => {
+            return apiKeys[model.value];
+        });
+    }, [apiKeys]);
+
     const update = useCallback(
         async (key: string, value: any) => {
             const newSetting = { ...setting, [key]: value };
@@ -31,6 +39,12 @@ function Setting() {
         },
         [setting],
     );
+
+    useEffect(() => {
+        if (filteredModelSelection.length > 0 && !filteredModelSelection.some((m) => m.value === setting.model)) {
+            update('model', filteredModelSelection[0].value);
+        }
+    }, [filteredModelSelection, setting.model, update]);
 
     const clampTextCount = useCallback(
         (value) => {
@@ -54,7 +68,14 @@ function Setting() {
                 onChange={(v) => update('language', v)}
             />
             <Selection label="Mode" list={modeSelection} value={setting.mode} onChange={(v) => update('mode', v)} />
-            <Selection label="Model" list={modelSelection} value={setting.model} onChange={(v) => update('model', v)} />
+            {filteredModelSelection.length > 0 && (
+                <Selection
+                    label="Model"
+                    list={filteredModelSelection}
+                    value={setting.model}
+                    onChange={(v) => update('model', v)}
+                />
+            )}
 
             {/* Summarize count */}
             <div className="flex gap-1 justify-center items-center">
