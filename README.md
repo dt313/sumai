@@ -1,33 +1,101 @@
-This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
+<div align="center">
+  <a href="https://github.com/dt313/sumai">
+    <img src="./assets/icon.png" alt="Logo" width="80" height="80">
+  </a>
 
-## Getting Started
+<h3 align="center">Sumai</h3>
 
-First, run the development server:
+  <p align="center">
+    <strong>Sumai</strong> is a powerful browser extension that lets you summarize, explain, and translate content directly in your browser using modern LLM AI. Enhance your reading experience with instant AI insights tailored to your language.
+    <br />
+    <br />
+    <a href="https://github.com/dt313/sumai">View Repo</a>
+  </p>
+</div>
+
+---
+
+## 🚀 Features
+
+✅ **Instant Summarization** – Get concise summaries of any web page or selected text.  
+✅ **Smart Translation** – Translate content into your target language with natural flow.  
+✅ **Concept Explanation** – Simplify complex terms and ideas for better understanding.  
+✅ **Multi-LLM Support** – Choose between ChatGPT, Claude, Gemini, and local Ollama models.  
+✅ **Real-time Streaming** – See responses as they are generated for a smooth experience.  
+✅ **Smart Triggers** – Activate via double-click, Shift+selection, or context menu.  
+✅ **Customizable** – Adjust summary length, language, and theme (Dark/Light).  
+✅ **Privacy Focused** – Your API keys are stored securely in your local extension storage.
+
+---
+
+## 🧑‍💻 Tech Stack
+
+### 🖥️ Frontend & Extension
+
+- [Plasmo](https://docs.plasmo.com/) (Browser Extension Framework)
+- [React 18](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- Lucide React & Heroicons
+- Marked & Highlight.js (Markdown processing)
+
+### 🔧 AI Integration
+
+- OpenAI API (ChatGPT)
+- Anthropic API (Claude)
+- Google Generative AI (Gemini)
+- Ollama (Local AI support)
+
+---
+
+## 📦 Getting Started
+
+### ⚙️ 1. Clone the repository
+
+```bash
+git clone https://github.com/dt313/sumai.git
+cd sumai
+```
+
+### ⚙️ 2. Install dependencies
+
+```bash
+pnpm install
+```
+
+### ⚙️ 3. Development
+
+Run the development server:
 
 ```bash
 pnpm dev
-# or
-npm run dev
 ```
 
-Open your browser and load the appropriate development build. For example, if you are developing for the chrome browser, using manifest v3, use: `build/chrome-mv3-dev`.
+Open your browser and load the extension from the `build/chrome-mv3-dev` folder (or equivalent for your browser).
 
-You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
+### ⚙️ 4. Production Build
 
-For further guidance, [visit our Documentation](https://docs.plasmo.com/)
-
-## Making production build
-
-Run the following:
+To create a production-ready bundle:
 
 ```bash
 pnpm build
-# or
-npm run build
 ```
 
-This should create a production bundle for your extension, ready to be zipped and published to the stores.
+The build output will be in the `build` directory, ready to be loaded or zipped for submission.
 
-## Submit to the webstores
+---
 
-The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
+## 🛠️ Configuration
+
+Once installed, click the extension icon to set up your API keys:
+
+1. Open the extension popup.
+2. Navigate to **Settings**.
+3. Enter your API keys for the providers you wish to use (OpenAI, Anthropic, Google, or Ollama URL).
+4. Save settings and start summarizing!
+
+---
+
+<div align="center">
+  Built with ❤️ for better web reading.
+</div>
