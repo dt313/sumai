@@ -19,6 +19,11 @@ export const buildGeminiHeaders = (key: string) => ({
     Authorization: `Bearer ${key}`,
 });
 
+export const buildOLAMAHeaders = (key: string) => ({
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${key}`,
+});
+
 type OpenAIBodyParams = {
     model?: string;
     systemPrompt: string;
@@ -94,5 +99,26 @@ export const buildGeminiBody = ({ model = DEFAULT_GEMINI_MODEL, systemPrompt, us
     return {
         model,
         contents,
+    };
+};
+
+type OLAMABodyParams = {
+    model?: string;
+    systemPrompt?: string;
+    userPrompt?: string;
+    stream?: boolean;
+};
+
+export const buildOLAMABody = ({
+    systemPrompt,
+    userPrompt,
+    model = 'gpt-oss:120b',
+    stream = true,
+}: OLAMABodyParams) => {
+    return {
+        model,
+        system: systemPrompt,
+        prompt: userPrompt,
+        stream,
     };
 };

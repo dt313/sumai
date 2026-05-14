@@ -1,4 +1,4 @@
-import { SSU_API_URL, SSU_MODEL_ENDPOINTS } from '~constants';
+import { OLAMA_URL, SSU_API_URL, SSU_MODEL_ENDPOINTS } from '~constants';
 import type { ModelType, ModeType } from '~types';
 import getErrorMessage from '~utils/get-error-msg';
 import {
@@ -6,6 +6,8 @@ import {
     buildClaudeHeaders,
     buildGeminiBody,
     buildGeminiHeaders,
+    buildOLAMABody,
+    buildOLAMAHeaders,
     buildOpenAIBody,
     buildOpenAIHeaders,
 } from '~utils/get-llm-request';
@@ -60,7 +62,6 @@ const generatePrompt = (
                             Response markdown format.
                              Do NOT exceed ${textCount} words.
                             Text to summarize:\n\n${text}`;
-            break;
             break;
 
         case 'translate':
@@ -158,6 +159,7 @@ const handleStreamingResponse = async (
                         }
                         break;
                     }
+
                     default:
                         break;
                 }
@@ -205,4 +207,81 @@ export const ask = async (
     } catch (error) {
         throw new Error(`${getErrorMessage(error, 'Ask LLM error')}`);
     }
+};
+
+export const askOLAMA = async (
+    key: string,
+    text: string,
+    language: string = 'English',
+    textCount: number = 50,
+    mode: ModeType = 'summary',
+    onChunk?: (chunk: string) => void,
+) => {
+    try {
+        const { systemPrompt, userPrompt } = generatePrompt(language, textCount, text, mode);
+
+        const headers = buildOLAMAHeaders(key);
+        const body = buildOLAMABody({ systemPrompt, userPrompt, stream: true });
+
+        const response = await fetch(OLAMA_URL, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(`${getErrorMessage(err, 'Request Error')}`);
+        }
+
+        return await handleOllamaStreamingResponse(response, onChunk);
+    } catch (error) {
+        throw new Error(`${getErrorMessage(error, 'Ask LLM error')}`);
+    }
+};
+
+const handleOllamaStreamingResponse = async (
+    response: Response,
+    onChunk?: (chunk: string) => void,
+): Promise<string> => {
+    if (!response.body) throw new Error('No response body for streaming');
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+
+    let done = false;
+    let result = '';
+    let buffer = '';
+
+    while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (!value) continue;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+            if (!line.trim()) continue;
+
+            try {
+                const parsed = JSON.parse(line);
+
+                if (parsed.response) {
+                    result += parsed.response;
+                    if (onChunk) onChunk(parsed.response);
+                }
+
+                if (parsed.done) {
+                    return result;
+                }
+            } catch (err) {
+                throw getErrorMessage(err);
+            }
+        }
+    }
+
+    return result;
 };

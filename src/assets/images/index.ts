@@ -8,7 +8,8 @@ const earth = require('./earth.gif');
 const bulb = require('./bulb.gif');
 const summary = require('./document.gif');
 const bard = require('./bard.png');
+const olama = require('./olama.png');
 
-const images = { openai, gemini, claude, ssu, logo, loading, earth, bulb, summary, bard };
+const images = { openai, gemini, claude, ssu, logo, loading, earth, bulb, summary, bard, olama };
 
 export default images;

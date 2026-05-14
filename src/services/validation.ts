@@ -102,3 +102,29 @@ export const validateSSUKey = async (key: string): Promise<boolean> => {
         throw getErrorMessage(error?.error || error?.detail, 'Validation ssu key error');
     }
 };
+
+export const validateOLAMAKey = async (key: string): Promise<boolean> => {
+    try {
+        const res = await fetch('https://ollama.com/api/generate', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${key}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: 'gpt-oss:120b',
+                prompt: 'Test',
+                stream: false,
+            }),
+        });
+
+        if (res?.ok) {
+            return true;
+        } else {
+            const data = await res.json();
+            throw data;
+        }
+    } catch (error) {
+        throw getErrorMessage(error.message || error?.error || error?.detail, 'Validation olama key error');
+    }
+};

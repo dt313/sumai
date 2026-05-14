@@ -27,6 +27,13 @@ export const keyInputs: readonly KeyInput[] = [
         placeholder: 'Enter SSU Key here',
         link: 'https://ssu.factchat.bot/dashboard/developers',
     },
+    {
+        label: 'OLAMA',
+        provider: 'olama',
+        logo: images.olama,
+        placeholder: 'Enter OLAMA Key here',
+        link: 'https://olama.factchat.bot/dashboard/developers',
+    },
 ];
 
 export const modelSelection = [

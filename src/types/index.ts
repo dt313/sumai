@@ -8,7 +8,7 @@ export type BackgroundResponse = {
 
 export type ModelType = 'chatgpt' | 'claude' | 'gemini';
 export type ModeType = 'translate' | 'summary' | 'explain';
-export type Provider = ModelType | 'ssu';
+export type Provider = ModelType | 'ssu' | 'olama';
 
 export type KeyInput = {
     label: string;

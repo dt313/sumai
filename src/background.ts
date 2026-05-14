@@ -1,5 +1,5 @@
 import { defaultApiKeys, defaultSetting } from '~constants';
-import { ask } from '~services/ask';
+import { ask, askOLAMA } from '~services/ask';
 import type { KeyValidateRequestData, SummaryRequestData } from '~types';
 import getErrorMessage from '~utils/get-error-msg';
 // background.ts
@@ -54,23 +54,42 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const data = msg.data as SummaryRequestData;
         storage.get('apiKeys').then(({ apiKeys }) => {
             const ssuKey = apiKeys?.ssu || null;
+            const olamaKey = apiKeys?.olama || null;
+            const model = ssuKey || olamaKey;
             let summary = '';
 
-            ask(ssuKey, data.model, data.text, data.language, data.textCount, data.mode, (chunk) => {
-                chrome.tabs.sendMessage(sender.tab!.id!, { type: 'ASK_CHUNK', chunk });
-                summary += chunk;
-            })
-                .then(() => sendResponse({ ok: true, data: { content: summary } }))
-                .catch((err) => {
-                    const errorMsg = getErrorMessage(err || 'Ask LLM error');
+            if (ssuKey) {
+                ask(ssuKey, data.model, data.text, data.language, data.textCount, data.mode, (chunk) => {
+                    chrome.tabs.sendMessage(sender.tab!.id!, { type: 'ASK_CHUNK', chunk });
+                    summary += chunk;
+                })
+                    .then(() => sendResponse({ ok: true, data: { content: summary } }))
+                    .catch((err) => {
+                        const errorMsg = getErrorMessage(err || 'Ask LLM error');
 
-                    chrome.tabs.sendMessage(sender.tab!.id!, {
-                        type: 'ASK_ERROR',
-                        error: errorMsg,
+                        chrome.tabs.sendMessage(sender.tab!.id!, {
+                            type: 'ASK_ERROR',
+                            error: errorMsg,
+                        });
+
+                        sendResponse({ ok: false, error: { message: errorMsg } });
                     });
+            } else if (olamaKey) {
+                askOLAMA(olamaKey, data.text, data.language, data.textCount, data.mode, (chunk) => {
+                    chrome.tabs.sendMessage(sender.tab!.id!, { type: 'ASK_CHUNK', chunk });
+                    summary += chunk;
+                })
+                    .then(() => sendResponse({ ok: true, data: { content: summary } }))
+                    .catch((err) => {
+                        const errorMsg = getErrorMessage(err || 'Ask LLM error');
+                        chrome.tabs.sendMessage(sender.tab!.id!, {
+                            type: 'ASK_ERROR',
+                            error: errorMsg,
+                        });
 
-                    sendResponse({ ok: false, error: { message: errorMsg } });
-                });
+                        sendResponse({ ok: false, error: { message: errorMsg } });
+                    });
+            }
         });
 
         return true; // giữ port mở
